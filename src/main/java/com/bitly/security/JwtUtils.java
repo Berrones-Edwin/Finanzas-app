@@ -2,12 +2,12 @@ package com.bitly.security;
 
 import java.security.Key;
 import java.sql.Date;
-import java.util.Base64.Decoder;
 import java.util.stream.Collectors;
 
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import com.bitly.services.UserDetailsImpl;
 
@@ -16,6 +16,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 
+@Component
 public class JwtUtils {
 
 
