@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bitly.dtos.AuthenticationRequest;
 import com.bitly.dtos.AuthenticationResponse;
-import com.bitly.dtos.LogoutRequest;
 import com.bitly.dtos.ReqisterRequest;
 import com.bitly.services.AuthService;
 

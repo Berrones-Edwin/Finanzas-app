@@ -25,7 +25,7 @@ public class SecurityConfig {
 
         private final JwtFilter jwtAuthFilter;
         private final AuthenticationProvider authenticationProvider;
-
+        
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 
@@ -35,6 +35,7 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(
                                                 req -> req
                                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                                                .requestMatchers("/api/v1/auth/logout").authenticated()
                                                                 .requestMatchers(
                                                                                 "/api/v1/auth/**",
                                                                                 "/auth/**",

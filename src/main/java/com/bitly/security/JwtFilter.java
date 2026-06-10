@@ -2,6 +2,7 @@ package com.bitly.security;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -30,6 +31,13 @@ public class JwtFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final TokenRepository tokenRepository;
 
+    private static final List<String> PUBLIC_PATHS = List.of(
+            "/api/v1/auth/register",
+            "/api/v1/auth/login",
+            "/api/v1/auth/verify-email",
+            "/v3/api-docs",
+            "/swagger-ui");
+
     public JwtFilter(
             JwtService jwtService,
             UserDetailsService userDetailsService,
@@ -45,7 +53,10 @@ public class JwtFilter extends OncePerRequestFilter {
             @Nonnull HttpServletResponse response,
             @Nonnull FilterChain filterChain) throws IOException, ServletException {
 
-        if (request.getServletPath().contains("/api/v1/auth")) {
+        String path = request.getServletPath();
+        boolean isPublic = PUBLIC_PATHS.stream().anyMatch(path::contains);
+
+        if (isPublic) {
 
             filterChain.doFilter(request, response);
             return;
@@ -64,14 +75,12 @@ public class JwtFilter extends OncePerRequestFilter {
         jwt = authHeader.substring(7);
         userEmail = jwtService.extractUsername(jwt);
 
-     
-
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
-               boolean isTokenValidInDB = tokenRepository.findByToken(jwt)
-                .map(t -> !t.isRevoked() && t.getExpiresAt().isAfter(LocalDateTime.now()))
-                .orElse(false);
+            boolean isTokenValidInDB = tokenRepository.findByToken(jwt)
+                    .map(t -> !t.isRevoked() && t.getExpiresAt().isAfter(LocalDateTime.now()))
+                    .orElse(false);
 
             if (jwtService.isTokenValid(jwt, userDetails) && isTokenValidInDB) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(

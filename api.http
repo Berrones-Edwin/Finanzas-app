@@ -11,7 +11,7 @@ Content-Type: application/json
 {
     "firstName": "name",
     "lastName": "lastname",
-    "email": "email@test.com",
+    "email": "email2@test.com",
     "password": "12345678"
 }
 
@@ -30,8 +30,4 @@ Content-Type: application/json
 ### Logout 
 
 POST {{URL}}/api/v1/auth/logout
-Content-Type: application/json
-
-{
-    "token":"eyJhbGciOiJIUzM4NCJ9.eyJmdWxsbmFtZSI6Im5hbWUgbGFzdG5hbWUiLCJzdWIiOiJlbWFpbEB0ZXN0LmNvbSIsImlhdCI6MTc4MTA0MDYzNywiZXhwIjoxNzgxMTI3MDM3LCJhdXRob3JpdGllcyI6WyJST0xFX0NMSUVOVCJdfQ.G5fLg7Ms6szhHi_eV76e4e5RGLMCI25QG2rtRcCAx-Z-6EpZPbM3DWxdKBEgoVKe"
-}
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJmdWxsbmFtZSI6Im5hbWUgbGFzdG5hbWUiLCJzdWIiOiJlbWFpbEB0ZXN0LmNvbSIsImlhdCI6MTc4MTExMDI1MSwiZXhwIjoxNzgxMTk2NjUxLCJhdXRob3JpdGllcyI6WyJST0xFX0NMSUVOVCJdfQ.njJH7jm2T-W-JlQWxiv4yN0TavJmtI1y1k_M_udnIJKWqc-2X2ARdZi3LDyWQiDN

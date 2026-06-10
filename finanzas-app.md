@@ -204,6 +204,34 @@ CREATE TABLE budgets (
   FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
   UNIQUE KEY uq_budget_month_category (user_id, category_id, month)
 );
+
+CREATE TABLE accounts (
+  id          INT PRIMARY KEY AUTO_INCREMENT,
+  user_id     INT NOT NULL,
+  name        VARCHAR(100) NOT NULL,  -- "BBVA", "Efectivo", "Débito"
+  type        ENUM('cash', 'bank', 'credit', 'savings') NOT NULL,
+  balance     DECIMAL(12,2) DEFAULT 0,
+  currency    VARCHAR(3) DEFAULT 'MXN',
+  color       VARCHAR(7) DEFAULT '#6B7280',
+  icon        VARCHAR(50) DEFAULT 'wallet',
+  is_active   BOOLEAN DEFAULT TRUE,
+  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE transfers (
+  id                INT PRIMARY KEY AUTO_INCREMENT,
+  user_id           INT NOT NULL,
+  from_account_id   INT NOT NULL,
+  to_account_id     INT NOT NULL,
+  amount            DECIMAL(12,2) NOT NULL CHECK (amount > 0),
+  description       VARCHAR(500),
+  date              DATE NOT NULL,
+  created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (from_account_id) REFERENCES accounts(id),
+  FOREIGN KEY (to_account_id) REFERENCES accounts(id)
+);
 ```
 
 **Relaciones:**
