@@ -1,8 +1,16 @@
 package com.bitly.models;
 
 
+import java.security.Principal;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.stream.Collectors;
+
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.bitly.enums.UserRole;
 
@@ -15,22 +23,24 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
 
-@Entity
 @Getter
 @Setter
-@Table(name = "users")
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
+@Table(name = "users")
 
 @SQLDelete(sql="UPDATE users SET deleted_at = NOW() WHERE id = ?")
 @SQLRestriction("deleted_at IS NULL")
-public class User extends BaseEntity {
+public class User extends BaseEntity implements UserDetails, Principal{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,17 +48,45 @@ public class User extends BaseEntity {
 
     private String email;
 
-    private String username;
-
     private String password;
     
-    private String name;
+    private String firstName;
+    
+    private String lastName;
 
-    private String currency;
-
+    @Builder.Default
+    private String currency ="USD";
+    
     @Enumerated(EnumType.STRING)
     @Column(name="role", nullable = false)
+    @Builder.Default
     private UserRole userRole = UserRole.ROLE_CLIENT;
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public String getName() {
+        return email;
+    }
+
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
+
+
+   @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+
+        return Collections.singletonList(new SimpleGrantedAuthority(this.userRole.name()));
+    }
 
 
 }
