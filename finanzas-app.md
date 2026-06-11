@@ -154,85 +154,83 @@ CREATE TABLE users (
   id          INT PRIMARY KEY AUTO_INCREMENT,
   name        VARCHAR(100) NOT NULL,
   email       VARCHAR(255) NOT NULL UNIQUE,
-  password    VARCHAR(255) NOT NULL,  -- bcrypt hash
+  password    VARCHAR(255) NOT NULL,
   currency    VARCHAR(3) DEFAULT 'USD',
   created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  deleted_at  TIMESTAMP NULL          -- soft delete
+  deleted_at  TIMESTAMP NULL
 );
 
--- Tabla: categories
+CREATE TABLE accounts (
+  id          INT PRIMARY KEY AUTO_INCREMENT,
+  user_id     INT NOT NULL,
+  name        VARCHAR(100) NOT NULL,
+  type        ENUM('cash', 'bank', 'credit', 'savings') NOT NULL,
+  currency    VARCHAR(3) DEFAULT 'MXN',
+  color       VARCHAR(7) DEFAULT '#6B7280',
+  is_active   BOOLEAN DEFAULT TRUE,
+  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 CREATE TABLE categories (
   id          INT PRIMARY KEY AUTO_INCREMENT,
   user_id     INT NOT NULL,
   name        VARCHAR(100) NOT NULL,
   type        ENUM('income', 'expense') NOT NULL,
-  color       VARCHAR(7) DEFAULT '#6B7280',  -- hex color
-  icon        VARCHAR(50) DEFAULT 'tag',     -- icon name
+  color       VARCHAR(7) DEFAULT '#6B7280',
+  icon        VARCHAR(50) DEFAULT 'tag',
   created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   UNIQUE KEY uq_category_user (user_id, name)
 );
 
--- Tabla: transactions
 CREATE TABLE transactions (
   id          INT PRIMARY KEY AUTO_INCREMENT,
   user_id     INT NOT NULL,
   category_id INT NOT NULL,
+  account_id  INT NOT NULL,
   type        ENUM('income', 'expense') NOT NULL,
   amount      DECIMAL(12,2) NOT NULL CHECK (amount > 0),
   description VARCHAR(500),
   date        DATE NOT NULL,
   created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT,
+  FOREIGN KEY (user_id)     REFERENCES users(id)       ON DELETE CASCADE,
+  FOREIGN KEY (category_id) REFERENCES categories(id)  ON DELETE RESTRICT,
+  FOREIGN KEY (account_id)  REFERENCES accounts(id)    ON DELETE RESTRICT,
   INDEX idx_user_date (user_id, date),
   INDEX idx_user_type (user_id, type)
 );
 
--- Tabla: budgets
 CREATE TABLE budgets (
-  id          INT PRIMARY KEY AUTO_INCREMENT,
-  user_id     INT NOT NULL,
-  category_id INT NOT NULL,
-  month       DATE NOT NULL,               -- primer día del mes (2025-01-01)
-  amount      DECIMAL(12,2) NOT NULL CHECK (amount > 0),
-  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  id               INT PRIMARY KEY AUTO_INCREMENT,
+  user_id          INT NOT NULL,
+  category_id      INT NOT NULL,
+  month            DATE NOT NULL,
+  amount           DECIMAL(12,2) NOT NULL CHECK (amount > 0),
+  alert_threshold  INT DEFAULT 80,
+  notes            VARCHAR(500),
+  created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id)     REFERENCES users(id)      ON DELETE CASCADE,
   FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
   UNIQUE KEY uq_budget_month_category (user_id, category_id, month)
 );
 
-CREATE TABLE accounts (
-  id          INT PRIMARY KEY AUTO_INCREMENT,
-  user_id     INT NOT NULL,
-  name        VARCHAR(100) NOT NULL,  -- "BBVA", "Efectivo", "Débito"
-  type        ENUM('cash', 'bank', 'credit', 'savings') NOT NULL,
-  balance     DECIMAL(12,2) DEFAULT 0,
-  currency    VARCHAR(3) DEFAULT 'MXN',
-  color       VARCHAR(7) DEFAULT '#6B7280',
-  icon        VARCHAR(50) DEFAULT 'wallet',
-  is_active   BOOLEAN DEFAULT TRUE,
-  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
 CREATE TABLE transfers (
-  id                INT PRIMARY KEY AUTO_INCREMENT,
-  user_id           INT NOT NULL,
-  from_account_id   INT NOT NULL,
-  to_account_id     INT NOT NULL,
-  amount            DECIMAL(12,2) NOT NULL CHECK (amount > 0),
-  description       VARCHAR(500),
-  date              DATE NOT NULL,
-  created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  FOREIGN KEY (from_account_id) REFERENCES accounts(id),
-  FOREIGN KEY (to_account_id) REFERENCES accounts(id)
+  id               INT PRIMARY KEY AUTO_INCREMENT,
+  user_id          INT NOT NULL,
+  from_account_id  INT NOT NULL,
+  to_account_id    INT NOT NULL,
+  amount           DECIMAL(12,2) NOT NULL CHECK (amount > 0),
+  description      VARCHAR(500),
+  date             DATE NOT NULL,
+  created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id)          REFERENCES users(id)    ON DELETE CASCADE,
+  FOREIGN KEY (from_account_id)  REFERENCES accounts(id) ON DELETE RESTRICT,
+  FOREIGN KEY (to_account_id)    REFERENCES accounts(id) ON DELETE RESTRICT
 );
-```
 
 **Relaciones:**
 
@@ -247,28 +245,39 @@ CREATE TABLE transfers (
 ### Endpoints
 
 | Método | Endpoint | Auth | Descripción |
-|---|---|---|---|
+|--- | --- | --- | --- |
 | POST | `/api/auth/register` | No | Registrar usuario |
-| POST | `/api/auth/login` | No | Iniciar sesión → devuelve JWT |
+| POST | `/api/auth/login` | No | Iniciar sesión |
 | POST | `/api/auth/refresh` | No | Refrescar token |
-| POST | `/api/auth/logout` | Sí | Invalidar refresh token |
-| GET | `/api/users/me` | Sí | Perfil del usuario actual |
+| POST | `/api/auth/logout` | Sí | Invalidar token |
+| GET | `/api/users/me` | Sí | Perfil del usuario |
 | PATCH | `/api/users/me` | Sí | Actualizar perfil |
-| GET | `/api/categories` | Sí | Listar categorías del usuario |
+| GET | `/api/accounts` | Sí | Listar cuentas |
+| POST | `/api/accounts` | Sí | Crear cuenta |
+| PATCH | `/api/accounts/:id` | Sí | Editar cuenta |
+| DELETE | `/api/accounts/:id` | Sí | Desactivar cuenta |
+| GET | `/api/accounts/:id/balance` | Sí | Balance de cuenta |
+| GET | `/api/categories` | Sí | Listar categorías |
 | POST | `/api/categories` | Sí | Crear categoría |
 | PATCH | `/api/categories/:id` | Sí | Editar categoría |
 | DELETE | `/api/categories/:id` | Sí | Eliminar categoría |
-| GET | `/api/transactions` | Sí | Listar transacciones (con filtros: `?startDate=&endDate=&type=&categoryId=&page=&limit=`) |
+| GET | `/api/transactions` | Sí | Listar con filtros |
 | POST | `/api/transactions` | Sí | Crear transacción |
-| GET | `/api/transactions/:id` | Sí | Detalle de transacción |
-| PATCH | `/api/transactions/:id` | Sí | Editar transacción |
-| DELETE | `/api/transactions/:id` | Sí | Eliminar transacción |
-| GET | `/api/budgets` | Sí | Listar presupuestos (filtro `?month=`) |
-| POST | `/api/budgets` | Sí | Crear/actualizar presupuesto |
+| GET | `/api/transactions/:id` | Sí | Detalle |
+| PATCH | `/api/transactions/:id` | Sí | Editar |
+| DELETE | `/api/transactions/:id` | Sí | Eliminar |
+| GET | `/api/transfers` | Sí | Listar transferencias |
+| POST | `/api/transfers` | Sí | Crear transferencia |
+| DELETE | `/api/transfers/:id` | Sí | Eliminar transferencia |
+| GET | `/api/budgets` | Sí | Listar presupuestos |
+| POST | `/api/budgets` | Sí | Crear presupuesto |
 | DELETE | `/api/budgets/:id` | Sí | Eliminar presupuesto |
-| GET | `/api/dashboard/summary` | Sí | Balance, ingresos/gastos del mes |
-| GET | `/api/dashboard/by-category` | Sí | Gastos agrupados por categoría (rango de fechas) |
-| GET | `/api/dashboard/trends` | Sí | Ingresos y gastos mensuales (últimos 12 meses) |
+| GET | `/api/budgets/:id/summary` | Sí | Budget + spent + remaining |
+| GET | `/api/dashboard/summary` | Sí | Balance general del mes |
+| GET | `/api/dashboard/by-category` | Sí | Gastos por categoría |
+| GET | `/api/dashboard/by-account` | Sí | Balance por cuenta |
+| GET | `/api/dashboard/trends` | Sí | Tendencias 12 meses |
+
 
 ### Ejemplos de respuestas
 
