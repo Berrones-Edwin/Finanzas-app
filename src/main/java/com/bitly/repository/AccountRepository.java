@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.bitly.models.Account;
 
-public interface AccountRepository  extends JpaRepository<Long,Account>{
+public interface AccountRepository  extends JpaRepository<Account,Long>{
 
     List<Account> findByUserId(Long userId);
 
