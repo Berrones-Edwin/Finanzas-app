@@ -2,6 +2,7 @@ package com.bitly.services;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,45 +18,53 @@ import com.bitly.models.User;
 import com.bitly.repository.CategoryRepository;
 import com.bitly.repository.UserRepository;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @Service
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final CategoryMapper categoryMapper;
+
     public CategoryService(
-         CategoryRepository categoryRepository,
-         UserRepository userRepository,
-         CategoryMapper categoryMapper
-    ){
+            CategoryRepository categoryRepository,
+            UserRepository userRepository,
+            CategoryMapper categoryMapper) {
 
         this.categoryRepository = categoryRepository;
         this.userRepository = userRepository;
         this.categoryMapper = categoryMapper;
     }
 
+    public PageResponse<CategoryResponse> getAllCategories(String email, int page, int size) {
 
-    public PageResponse<CategoryResponse> getAllCategories(String email,int page,int size){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User was not found"));
 
-
-        User user = userRepository.findByEmail(email).orElseThrow(()->new UsernameNotFoundException("User was not found"));
-
-        Pageable pageable=PageRequest.of(page, size,Sort.by("createdAt").descending());
-        Page<Category> categories = categoryRepository.findByUserId(user.getId(),pageable);
-
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<Category> categories = categoryRepository.findByUserId(user.getId(), pageable);
 
         List<CategoryResponse> categoryResponses = categories.stream()
-        .map(categoryMapper::toDTO).toList();
-
+                .map(categoryMapper::toDTO).toList();
 
         return new PageResponse<>(
-            categoryResponses,
-            categories.getNumber(),
-            categories.getSize(),
-            categories.getTotalElements(),
-            categories.getTotalPages(),
-            categories.isFirst(),
-            categories.isLast()
-        );
+                categoryResponses,
+                categories.getNumber(),
+                categories.getSize(),
+                categories.getTotalElements(),
+                categories.getTotalPages(),
+                categories.isFirst(),
+                categories.isLast());
     }
+
+    public CategoryResponse findCategoryById(long id, String email) {
+
+        CategoryResponse category = categoryRepository.findByIdAndUserEmail(id, email).map(categoryMapper::toDTO)
+                .orElseThrow(() -> new EntityNotFoundException("No category found with the id " + id));
+
+        return category;
+
+    }
+
 }

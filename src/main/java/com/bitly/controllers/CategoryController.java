@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @RequestMapping("/api/v1/categories")
 @RestController
@@ -22,18 +23,25 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     public CategoryController(
-         CategoryService categoryService
-    ){
+            CategoryService categoryService) {
         this.categoryService = categoryService;
     }
 
     @GetMapping
-    public ResponseEntity<PageResponse<CategoryResponse>> getAllCategories(@AuthenticationPrincipal UserDetails userDetails,
-        @RequestParam(name = "page",defaultValue = "0",required = false) int page,
-        @RequestParam(name = "size",defaultValue = "10",required = false) int size
-     ) {
+    public ResponseEntity<PageResponse<CategoryResponse>> getAllCategories(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size) {
 
-        return ResponseEntity.ok(categoryService.getAllCategories(userDetails.getUsername(),page,size));
+        return ResponseEntity.ok(categoryService.getAllCategories(userDetails.getUsername(), page, size));
+    }
+
+    @GetMapping("{categoryId}")
+    public ResponseEntity<CategoryResponse> getCategoryById(
+            @PathVariable("categoryId") long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        return ResponseEntity.ok(categoryService.findCategoryById(id, userDetails.getUsername()));
     }
 
 }
