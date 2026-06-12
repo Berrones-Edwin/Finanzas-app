@@ -4,17 +4,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bitly.dtos.CategoryRequest;
 import com.bitly.dtos.CategoryResponse;
 import com.bitly.dtos.PageResponse;
 import com.bitly.services.CategoryService;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RequestMapping("/api/v1/categories")
 @RestController
@@ -43,5 +49,15 @@ public class CategoryController {
 
         return ResponseEntity.ok(categoryService.findCategoryById(id, userDetails.getUsername()));
     }
+
+// return ResponseEntity.noContent().build(); // Genera un HTTP 204 (No Content)
+    @PostMapping
+    public ResponseEntity<CategoryResponse> saveCategory(
+        @Valid @RequestBody CategoryRequest request,
+        @AuthenticationPrincipal UserDetails userDetails
+    ){
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.createCategory(request,userDetails.getUsername()));
+    }
+
 
 }

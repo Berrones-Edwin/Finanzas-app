@@ -1,6 +1,7 @@
 package com.bitly.services;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.bitly.dtos.CategoryRequest;
 import com.bitly.dtos.CategoryResponse;
 import com.bitly.dtos.PageResponse;
 import com.bitly.mappers.CategoryMapper;
@@ -19,6 +21,7 @@ import com.bitly.repository.CategoryRepository;
 import com.bitly.repository.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 
 @Service
 public class CategoryService {
@@ -64,6 +67,24 @@ public class CategoryService {
                 .orElseThrow(() -> new EntityNotFoundException("No category found with the id " + id));
 
         return category;
+
+    }
+
+    public CategoryResponse createCategory(CategoryRequest request, String username) {
+
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User was not found with email " + username));
+
+        Category c = Category.builder()
+                .user(user)
+                .name(request.name())
+                .categoryType(request.categoryType())
+                .color(request.color())
+                .build();
+
+        Category categorySaved = categoryRepository.save(c);
+
+        return categoryMapper.toDTO(categorySaved);
 
     }
 
