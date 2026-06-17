@@ -81,12 +81,5 @@ public class Transaction extends BaseEntity {
     @Column(nullable = false)
     private LocalDate date;
 
-    @OneToMany(mappedBy="fromAccount")
-    @Builder.Default
-    private List<Transfer> outgoingTransfers = new ArrayList<>();
-
-
-    @OneToMany(mappedBy="toAccount")
-    @Builder.Default
-    private List<Transfer> incomingTransfers = new ArrayList<>();
+   
 }

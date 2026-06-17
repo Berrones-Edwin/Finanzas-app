@@ -71,4 +71,13 @@ public class Account extends BaseEntity {
     @Builder.Default
     private List<Transaction> transactions = new ArrayList<>();
 
+     @OneToMany(mappedBy="fromAccount")
+    @Builder.Default
+    private List<Transfer> outgoingTransfers = new ArrayList<>();
+
+
+    @OneToMany(mappedBy="toAccount")
+    @Builder.Default
+    private List<Transfer> incomingTransfers = new ArrayList<>();
+
 }
