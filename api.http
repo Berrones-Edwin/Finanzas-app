@@ -1,11 +1,11 @@
 
-@TOKEN=eyJhbGciOiJIUzM4NCJ9.eyJmdWxsbmFtZSI6Im5hbWUgbGFzdG5hbWUiLCJzdWIiOiJlbWFpbEB0ZXN0LmNvbSIsImlhdCI6MTc4MTA0MDYzNywiZXhwIjoxNzgxMTI3MDM3LCJhdXRob3JpdGllcyI6WyJST0xFX0NMSUVOVCJdfQ.G5fLg7Ms6szhHi_eV76e4e5RGLMCI25QG2rtRcCAx-Z-6EpZPbM3DWxdKBEgoVKe
-@URL=http://localhost:8080
+@TOKEN=eyJhbGciOiJIUzM4NCJ9.eyJmdWxsbmFtZSI6Im5hbWUgbGFzdG5hbWUiLCJzdWIiOiJlbWFpbEB0ZXN0LmNvbSIsImlhdCI6MTc4MTgxOTE5MCwiZXhwIjoxNzgxOTA1NTkwLCJhdXRob3JpdGllcyI6WyJST0xFX0NMSUVOVCJdfQ.AdiSME39mRYq81LqWkH3ed2izkgn6gtwAOQbzZutwlCODahq5be3HwkRG0OCgvzp
+@URL=http://localhost:8080/api/v1
 
 
 ### Register 
 
-POST {{URL}}/api/v1/auth/register
+POST {{URL}}/auth/register
 Content-Type: application/json
 
 {
@@ -18,7 +18,7 @@ Content-Type: application/json
 
 ### Login 
 
-POST {{URL}}/api/v1/auth/login
+POST {{URL}}/auth/login
 Content-Type: application/json
 
 {
@@ -29,5 +29,80 @@ Content-Type: application/json
 
 ### Logout 
 
-POST {{URL}}/api/v1/auth/logout
-Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJmdWxsbmFtZSI6Im5hbWUgbGFzdG5hbWUiLCJzdWIiOiJlbWFpbEB0ZXN0LmNvbSIsImlhdCI6MTc4MTExMDI1MSwiZXhwIjoxNzgxMTk2NjUxLCJhdXRob3JpdGllcyI6WyJST0xFX0NMSUVOVCJdfQ.njJH7jm2T-W-JlQWxiv4yN0TavJmtI1y1k_M_udnIJKWqc-2X2ARdZi3LDyWQiDN
+POST {{URL}}/auth/logout
+Authorization: Bearer {{TOKEN}}
+
+### Get All categories
+GET {{URL}}/categories
+Authorization: Bearer {{TOKEN}}
+
+### Get Single category
+GET {{URL}}/categories/1
+Authorization: Bearer {{TOKEN}}
+
+### create  category
+POST {{URL}}/categories
+Authorization: Bearer {{TOKEN}}
+Content-Type: application/json
+
+{
+    "name":"delete category",
+    "categoryType":"INCOME",
+    "color":"#4c1c74"
+}
+
+### update  category
+PATCH {{URL}}/categories/1
+Authorization: Bearer {{TOKEN}}
+Content-Type: application/json
+
+{
+    "name":"My first category edit",
+    "categoryType":"INCOME",
+    "color":"#4c1c74"
+}
+
+### delete  category
+DELETE {{URL}}/categories/3
+Authorization: Bearer {{TOKEN}}
+
+
+
+### Get All accounts
+GET {{URL}}/accounts
+Authorization: Bearer {{TOKEN}}
+
+### Get Single account
+GET {{URL}}/accounts/1
+Authorization: Bearer {{TOKEN}}
+
+
+### CREAR ACCOUNT
+POST {{URL}}/accounts
+Authorization: Bearer {{TOKEN}}
+Content-Type: application/json
+
+{
+    "name":"delete account",
+    "accountType":"BANK",
+    "color":"#99ec14",
+    "currency":"MXN",
+    "balance":1000.55
+}
+
+### update ACCOUNT
+PATCH {{URL}}/accounts/1
+Authorization: Bearer {{TOKEN}}
+Content-Type: application/json
+
+{
+    "name":"My first Account",
+    "accountType":"BANK",
+    "color":"#4c1c74",
+    "currency":"MXN",
+    "balance":1000.55
+}
+
+### delete  account
+DELETE {{URL}}/accounts/2
+Authorization: Bearer {{TOKEN}}
