@@ -1,21 +1,30 @@
 package com.bitly.repository;
 
-import java.util.List;
+import java.math.BigDecimal;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import com.bitly.dtos.AccountBalanceResponse;
 import com.bitly.models.Account;
 
-public interface AccountRepository  extends JpaRepository<Account,Long>{
+public interface AccountRepository extends JpaRepository<Account, Long> {
 
-    List<Account> findByUserId(Long userId);
+    Page<Account> findByUserId(Long userId, Pageable pageable);
 
-    List<Account> findByUserIdAndIsActiveTrue(Long userId);
+    Page<Account> findByUserIdAndIsActiveTrue(Long userId, Pageable pageable);
 
-    Optional<Account> findByIdAndUserId(Long id,Long userId);
+    Optional<Account> findByIdAndUserEmail(Long id, String email);
 
-    boolean existsByNameIgnoreCaseAndUserId(String name,Long userId);
-    
+    @Query("SELECT a FROM Account a WHERE a.id = :id AND a.user.email = :email")
+    Optional<Account> getBalance(@Param("email") String email, @Param("id") long id);
+
+    boolean existsByNameIgnoreCaseAndUserId(String name, Long userId);
+
+    boolean existsByNameIgnoreCaseAndUserIdAndIdNot(String name, Long userId, Long id);
 
 }
