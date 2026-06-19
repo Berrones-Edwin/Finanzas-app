@@ -24,6 +24,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,7 +37,11 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "users")
+@Table(name = "users",uniqueConstraints = {
+    @UniqueConstraint(name="uq_user_email_delete_at",columnNames = {
+        "email","deleted_at"
+    })
+})
 
 @SQLDelete(sql = "UPDATE users SET deleted_at = NOW() WHERE id = ?")
 @SQLRestriction("deleted_at IS NULL")
@@ -54,9 +59,6 @@ public class User extends BaseEntity implements UserDetails, Principal {
 
     private String lastName;
 
-    @Builder.Default
-    private String currency = "USD";
-
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     @Builder.Default
@@ -70,7 +72,7 @@ public class User extends BaseEntity implements UserDetails, Principal {
     @Builder.Default
     private List<Account> accounts = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user")
     @Builder.Default
     private List<Transaction> transactions = new ArrayList<>();
 
@@ -78,7 +80,7 @@ public class User extends BaseEntity implements UserDetails, Principal {
     @Builder.Default
     private List<Budget> budgets = new ArrayList<>();
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user")
     @Builder.Default
     private List<Transfer> transfers = new ArrayList<>();
 
