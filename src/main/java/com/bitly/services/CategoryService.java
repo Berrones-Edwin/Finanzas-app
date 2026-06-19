@@ -1,6 +1,5 @@
 package com.bitly.services;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -9,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.bitly.dtos.CategoryRequest;
 import com.bitly.dtos.CategoryResponse;
@@ -39,6 +39,7 @@ public class CategoryService {
                 this.categoryMapper = categoryMapper;
         }
 
+        @Transactional(readOnly = true)
         public PageResponse<CategoryResponse> getAllCategories(String email, int page, int size) {
 
                 User user = userRepository.findByEmail(email)
@@ -60,7 +61,8 @@ public class CategoryService {
                                 categories.isLast());
         }
 
-        public CategoryResponse findCategoryById(long id, String email) {
+        @Transactional(readOnly = true)
+        public CategoryResponse findCategoryById(String email,long id) {
 
                 CategoryResponse category = categoryRepository.findByIdAndUserEmail(id, email)
                                 .map(categoryMapper::toDTO)
@@ -70,6 +72,7 @@ public class CategoryService {
 
         }
 
+        @Transactional
         public CategoryResponse createCategory(CategoryRequest request, String username) {
 
                 User user = userRepository.findByEmail(username)
@@ -80,7 +83,7 @@ public class CategoryService {
                                 user.getId());
 
                 if (isCategoryDuplicated) {
-                        throw new CategoryAlreadyExistsException("You alreadey have a category name " + request.name());
+                        throw new CategoryAlreadyExistsException("You already have a category name " + request.name());
                 }
 
                 Category c = Category.builder()
@@ -96,6 +99,7 @@ public class CategoryService {
 
         }
 
+        @Transactional
         public CategoryResponse updateCategory(CategoryRequest request, String username, long categoryId) {
 
                 User user = userRepository.findByEmail(username)
@@ -108,7 +112,7 @@ public class CategoryService {
                                 categoryId);
 
                 if (isCategoryDuplicated) {
-                        throw new CategoryAlreadyExistsException("You alreadey have a category name " + request.name());
+                        throw new CategoryAlreadyExistsException("You already have a category name " + request.name());
                 }
 
                 Category c = categoryRepository.findByIdAndUserEmail(categoryId, username).orElseThrow(
@@ -124,14 +128,13 @@ public class CategoryService {
 
         }
 
+        @Transactional
         public void deleteCategory(String username, long id) {
 
-                Category category = categoryRepository.findByIdAndUserEmail(id, username).orElseThrow(()->new EntityNotFoundException("Category was not found with id " + id));
+                Category category = categoryRepository.findByIdAndUserEmail(id, username)
+                                .orElseThrow(() -> new EntityNotFoundException("Category was not found with id " + id));
 
-                category.setDeletedAt(LocalDateTime.now());
-
-                categoryRepository.save(category);
-                
+                categoryRepository.delete(category);
 
         }
 

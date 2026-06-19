@@ -48,7 +48,7 @@ public class CategoryController {
             @PathVariable("categoryId") long id,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        return ResponseEntity.ok(categoryService.findCategoryById(id, userDetails.getUsername()));
+        return ResponseEntity.ok(categoryService.findCategoryById( userDetails.getUsername(),id));
     }
 
 // return ResponseEntity.noContent().build(); // Genera un HTTP 204 (No Content)
