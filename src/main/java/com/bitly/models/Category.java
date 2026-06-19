@@ -35,7 +35,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "categories", uniqueConstraints = {
-        @UniqueConstraint(name = "uq_category_user", columnNames = { "user_id", "name" })
+        @UniqueConstraint(name = "uq_category_user", columnNames = { "user_id", "name","deleted_at" })
 })
 
 @SQLDelete(sql = "UPDATE categories SET deleted_at = NOW() WHERE id = ?")
