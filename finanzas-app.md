@@ -189,33 +189,48 @@ CREATE TABLE transfers (
 
 | Método | Endpoint | Auth | Descripción |
 |--- | --- | --- | --- |
-| POST | `/api/auth/register` | No | Registrar usuario |
-| POST | `/api/auth/login` | No | Iniciar sesión |
-| POST | `/api/auth/refresh` | No | Refrescar token |
-| POST | `/api/auth/logout` | Sí | Invalidar token |
+| POST | `/api/auth/register` | No | Registrar usuario | *
+| POST | `/api/auth/login` | No | Iniciar sesión | *
+| POST | `/api/auth/logout` | Sí | Invalidar token | *
+
+
+| POST | `/api/auth/refresh` | No | Refrescar token | 
 | GET | `/api/users/me` | Sí | Perfil del usuario |
 | PATCH | `/api/users/me` | Sí | Actualizar perfil |
-| GET | `/api/accounts` | Sí | Listar cuentas |
-| POST | `/api/accounts` | Sí | Crear cuenta |
-| PATCH | `/api/accounts/:id` | Sí | Editar cuenta |
-| DELETE | `/api/accounts/:id` | Sí | Desactivar cuenta |
+
+
+| GET | `/api/accounts` | Sí | Listar cuentas | *
+| POST | `/api/accounts` | Sí | Crear cuenta | *
+| PATCH | `/api/accounts/:id` | Sí | Editar cuenta | *
+| DELETE | `/api/accounts/:id` | Sí | Desactivar cuenta | *
+
+
 | GET | `/api/accounts/:id/balance` | Sí | Balance de cuenta |
-| GET | `/api/categories` | Sí | Listar categorías |
-| POST | `/api/categories` | Sí | Crear categoría |
-| PATCH | `/api/categories/:id` | Sí | Editar categoría |
-| DELETE | `/api/categories/:id` | Sí | Eliminar categoría |
+
+
+| GET | `/api/categories` | Sí | Listar categorías | *
+| POST | `/api/categories` | Sí | Crear categoría | *
+| PATCH | `/api/categories/:id` | Sí | Editar categoría | *
+| DELETE | `/api/categories/:id` | Sí | Eliminar categoría | *
+
 | GET | `/api/transactions` | Sí | Listar con filtros |
 | POST | `/api/transactions` | Sí | Crear transacción |
 | GET | `/api/transactions/:id` | Sí | Detalle |
 | PATCH | `/api/transactions/:id` | Sí | Editar |
 | DELETE | `/api/transactions/:id` | Sí | Eliminar |
+
+
 | GET | `/api/transfers` | Sí | Listar transferencias |
 | POST | `/api/transfers` | Sí | Crear transferencia |
 | DELETE | `/api/transfers/:id` | Sí | Eliminar transferencia |
+
+
 | GET | `/api/budgets` | Sí | Listar presupuestos |
 | POST | `/api/budgets` | Sí | Crear presupuesto |
 | DELETE | `/api/budgets/:id` | Sí | Eliminar presupuesto |
 | GET | `/api/budgets/:id/summary` | Sí | Budget + spent + remaining |
+
+
 | GET | `/api/dashboard/summary` | Sí | Balance general del mes |
 | GET | `/api/dashboard/by-category` | Sí | Gastos por categoría |
 | GET | `/api/dashboard/by-account` | Sí | Balance por cuenta |

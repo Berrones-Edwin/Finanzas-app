@@ -25,7 +25,7 @@ public record AccountCreateRequest(
 
         @NotNull(message = "Balance is mandatory")
         @PositiveOrZero(message = "The initial balance cannot be negative ")
-        @Digits(integer = 12,fraction = 2,message = "The balance format must be up to 8 integers digits and 2 decimals")
+        @Digits(integer = 12,fraction = 2,message = "The balance format must be up to 12 integers digits and 2 decimals")
          BigDecimal balance
 
 ) {

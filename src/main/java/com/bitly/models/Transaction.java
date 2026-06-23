@@ -2,7 +2,7 @@
 package com.bitly.models;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -76,7 +76,7 @@ public class Transaction extends BaseEntity {
     private String description;
 
     @Column(nullable = false)
-    private LocalDate date;
+    private LocalDateTime date;
 
    
 }

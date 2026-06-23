@@ -154,4 +154,6 @@ Quiero que estructures el proyecto utilizando las mejores prácticas (Clean Arch
 
 Por favor, comienza generando la estructura de carpetas sugerida y el código para login, register, CRUD CATEGORY, CRUD ACCOUNT. Dame código limpio, tipado estricto con TypeScript y manejo de errores visible para el usuario si la API devuelve un código de error.
 
-No uses la base de datos interna de Supabase para la lógica. Toda la data debe ser consumida de mi API externa de Spring Boot mediante Axios/Fetch usando el Bearer Token.
+NOTA: No uses la base de datos interna de Supabase para la lógica. Toda la data debe ser consumida de mi API externa de Spring Boot mediante Fetch usando el Bearer Token. No implementes ni crees ninguna llamada a ninguna API, solo crea las pages / vistas pero no crees servicios  que usen fecth ni hagan llamadas a ninguna API.
+
+SOLO CREA LAS VISTAS
