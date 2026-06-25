@@ -1,16 +1,22 @@
 package com.bitly.controllers;
 
+import java.time.LocalDateTime;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bitly.dtos.PageResponse;
 import com.bitly.dtos.transactions.TransactionCreateRequest;
 import com.bitly.dtos.transactions.TransactionResponse;
+import com.bitly.enums.TransactionType;
 import com.bitly.services.TransactionService;
 
 import jakarta.validation.Valid;
@@ -23,6 +29,21 @@ public class TransactionController {
 
     public TransactionController(TransactionService transactionService) {
         this.transactionService = transactionService;
+    }
+
+    @GetMapping
+    public ResponseEntity<PageResponse<TransactionResponse>> getAllTransactions(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size,
+            @RequestParam(name = "type", required = false) TransactionType type,
+            @RequestParam(name = "accountId", required = false) Long accountId,
+            @RequestParam(name = "categoryId", required = false) Long categoryId,
+            @RequestParam(name = "start", required = false) LocalDateTime start,
+            @RequestParam(name = "end", required = false) LocalDateTime end) {
+        return ResponseEntity.ok(
+                transactionService.getTransactions(userDetails.getUsername(), page, size, type, accountId, categoryId,
+                        start, end));
     }
 
     @PostMapping
