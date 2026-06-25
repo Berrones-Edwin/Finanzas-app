@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +45,15 @@ public class TransactionController {
         return ResponseEntity.ok(
                 transactionService.getTransactions(userDetails.getUsername(), page, size, type, accountId, categoryId,
                         start, end));
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<TransactionResponse> getTransaction(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @PathVariable("id") Long id
+    ){
+
+        return ResponseEntity.ok(transactionService.getTransaction(userDetails.getUsername(),id));
     }
 
     @PostMapping

@@ -13,8 +13,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.bitly.dtos.PageResponse;
-import com.bitly.dtos.transactions.TransactionAccountResponse;
-import com.bitly.dtos.transactions.TransactionCategoryResponse;
 import com.bitly.dtos.transactions.TransactionCreateRequest;
 import com.bitly.dtos.transactions.TransactionResponse;
 import com.bitly.enums.TransactionType;
@@ -147,5 +145,14 @@ public class TransactionService {
                 transactionPage.isFirst(),
                 transactionPage.isLast());
 
+    }
+
+    @Transactional(readOnly = true)
+    public TransactionResponse getTransaction(String username, Long id) {
+
+        Transaction transaction = transactionRepository.findByIdAndUserEmail(id, username)
+                .orElseThrow(() -> new EntityNotFoundException("No Transaction found with the id " + id));
+
+        return transactionMapper.toDTO(transaction);
     }
 }
