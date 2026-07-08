@@ -456,3 +456,89 @@ finanzas-personales/
 
 ---
 
+## FLUJO BUDGET
+### The user create a budget
+Categoría: Comida
+Mes: Junio 2026 (tú normalizas a 2026-06-01)
+Amount: $5,000 MXN  ← lo que PLANEA gastar
+alertThreshold: 80%
+
+### The user queries the june budget, the service do the operation
+spentAmount     = 800 + 450 + 1200 + 350 = $2,800  ← suma real de transacciones
+remainingAmount = 5,000 - 2,800          = $2,200  ← lo que le queda
+porcentaje      = (2,800 / 5,000) * 100  = 56%
+
+¿Supera el alertThreshold de 80%? No → isAlertSent se queda en false
+
+### If the 28 day the user registers another transaction (1500)
+spentAmount     = 2,800 + 1,500 = $4,300
+remainingAmount = 5,000 - 4,300 = $700
+porcentaje      = (4,300 / 5,000) * 100 = 86%
+
+¿Supera el alertThreshold de 80%? SÍ → disparas alerta, marcas isAlertSent = true
+
+### Date Range
+LocalDate start = budget.getMonth().withDayOfMonth(1);         // 2026-06-01
+LocalDate end   = budget.getMonth().withDayOfMonth(
+                      budget.getMonth().lengthOfMonth());       // 2026-06-30
+
+
+### Repository
+@Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t " +
+       "WHERE t.category.id = :categoryId " +
+       "AND t.user.id = :userId " +
+       "AND t.transactionType = :type " +
+       "AND t.date BETWEEN :start AND :end")
+BigDecimal sumByCategory(
+    @Param("categoryId") Long categoryId,
+    @Param("userId") Long userId,
+    @Param("type") TransactionType type,
+    @Param("start") LocalDate start,
+    @Param("end") LocalDate end
+);              
+
+### Service 
+@Transactional(readOnly = true)
+public BudgetResponse getBudgetById(long id, String username) {
+
+    Budget budget = budgetRepository.findByIdAndUserEmail(id, username)
+            .orElseThrow(() -> new EntityNotFoundException("Budget not found"));
+
+    LocalDate start = budget.getMonth().withDayOfMonth(1);
+    LocalDate end   = budget.getMonth().withDayOfMonth(
+                          budget.getMonth().lengthOfMonth());
+
+    BigDecimal spent = transactionRepository.sumByCategory(
+            budget.getCategory().getId(),
+            budget.getUser().getId(),
+            TransactionType.EXPENSE,
+            start,
+            end
+    );
+
+    BigDecimal remaining = budget.getAmount().subtract(spent);
+
+    // Se popula el @Transient, no se persiste
+    budget.setSpentAmount(spent);
+    budget.setRemainingAmount(remaining);
+
+    return budgetMapper.toDTO(budget);
+}
+
+### Response
+{
+  "id": 1,
+  "category": { "name": "Comida", "color": "#FF5733" },
+  "month": "2026-06",
+  "plannedAmount": 5000.00,
+  "spentAmount": 2800.00,
+  "remainingAmount": 2200.00,
+  "alertThreshold": 80,
+  "percentageUsed": 56.00,
+  "isAlertSent": false
+}
+
+BigDecimal percentage = spent
+    .divide(budget.getAmount(), 4, RoundingMode.HALF_UP)
+    .multiply(BigDecimal.valueOf(100))
+    .setScale(2, RoundingMode.HALF_UP);

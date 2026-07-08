@@ -15,7 +15,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -64,10 +67,24 @@ public class Budget extends BaseEntity {
     private BigDecimal amount;
 
     @Column(name = "alert_threshold")
+    @Min(value = 1,message = "Alert Threshold must be at least 1%")
+    @Max(value = 100,message = "Alert Threshold cannot exceed 100%")
     @Builder.Default
     private Integer alertThreshold = 80;
 
+    @Column(name = "is_alert_sent")
+    @Builder.Default
+    private Boolean isAlertSent = false;
+
     @Column(length = 100)
     private String notes;
+
+    @Transient
+    private BigDecimal spentAmount;
+
+    @Transient
+    private BigDecimal remainingAmount;
+
+
 }
 
