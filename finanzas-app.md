@@ -542,3 +542,147 @@ BigDecimal percentage = spent
     .divide(budget.getAmount(), 4, RoundingMode.HALF_UP)
     .multiply(BigDecimal.valueOf(100))
     .setScale(2, RoundingMode.HALF_UP);
+
+
+POST transfers
+GET transfers & transfer/id
+DELETE transfers/id
+
+
+| GET | `/api/dashboard/summary` | Sí | Balance general del mes |
+
+BigDecimal income = repository.sumIncome(...);
+BigDecimal expense = repository.sumExpense(...);
+
+BigDecimal balance = income.subtract(expense);
+
+income - expenses = net balance
+net balance / income *100
+save ratings
+
+
+GET /api/dashboard/monthly-balance?year=2026&month=7
+
+{
+    "income": 40000,
+    "expenses": 23000,
+    "netBalance": 17000
+}
+
+
+{
+    "month": "2026-07",
+    "income": 40000,
+    "expenses": 23000,
+    "netBalance": 17000,
+    "savingsRate": 42.5
+}
+
+BigDecimal savingsRate = BigDecimal.ZERO;
+
+if (income.compareTo(BigDecimal.ZERO) > 0) {
+
+    savingsRate = balance
+            .divide(income, 4, RoundingMode.HALF_UP)
+            .multiply(BigDecimal.valueOf(100));
+}
+
+income equals zero 
+if (income.compareTo(BigDecimal.ZERO) == 0) {
+    savingsRate = BigDecimal.ZERO;
+}
+
+
+| GET | `/api/dashboard/by-category` | Sí | Gastos por categoría |
+
+[
+    {
+        "categoryId": 1,
+        "category": "Food",
+        "amount": 800
+    },
+    {
+        "categoryId": 2,
+        "category": "Transport",
+        "amount": 1000
+    },
+    {
+        "categoryId": 3,
+        "category": "Entertainment",
+        "amount": 1500
+    }
+]
+
+
+SELECT
+    c.id,
+    c.name,
+    SUM(t.amount)
+FROM Transaction t
+JOIN t.category c
+WHERE t.user.id = :userId
+AND t.transactionType = 'EXPENSE'
+AND t.date BETWEEN :start AND :end
+GROUP BY c.id, c.name
+ORDER BY SUM(t.amount) DESC
+
+
+| GET | `/api/dashboard/by-account` | Sí | Balance por cuenta |
+
+[
+    {
+        "accountId": 1,
+        "account": "BBVA",
+        "balance": 25000
+    },
+    {
+        "accountId": 2,
+        "account": "Cash",
+        "balance": 3500
+    },
+    {
+        "accountId": 3,
+        "account": "Savings",
+        "balance": 120000
+    }
+]
+
+SELECT
+    a.id,
+    a.name,
+    SUM(
+        CASE
+            WHEN t.transactionType='INCOME'
+            THEN t.amount
+            ELSE -t.amount
+        END
+    )
+FROM Transaction t
+JOIN t.account a
+WHERE t.user.id=:userId
+GROUP BY a.id,a.name
+
+
+| GET | `/api/dashboard/trends` | Sí | Tendencias 12 meses |
+
+[
+    {
+        "month": "2026-01",
+        "income": 45000,
+        "expense": 28000
+    },
+    {
+        "month": "2026-02",
+        "income": 47000,
+        "expense": 30000
+    },
+    {
+        "month": "2026-03",
+        "income": 45000,
+        "expense": 25000
+    }
+]
+
+Generalmente son los últimos 12 meses.
+
+La consulta puede agrupar por año y mes.
