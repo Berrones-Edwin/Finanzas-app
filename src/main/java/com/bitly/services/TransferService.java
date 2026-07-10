@@ -24,7 +24,6 @@ import com.bitly.models.User;
 import com.bitly.repository.AccountRepository;
 import com.bitly.repository.TransferRepository;
 import com.bitly.repository.UserRepository;
-import com.bitly.specifications.TransactionSpecification;
 import com.bitly.specifications.TransferSpecification;
 
 import jakarta.persistence.EntityNotFoundException;
