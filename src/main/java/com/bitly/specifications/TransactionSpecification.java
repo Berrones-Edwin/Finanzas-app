@@ -7,10 +7,18 @@ import org.springframework.data.jpa.domain.Specification;
 import com.bitly.enums.TransactionType;
 import com.bitly.models.Transaction;
 
+import jakarta.persistence.criteria.JoinType;
+
 public class TransactionSpecification {
 
     public static Specification<Transaction> hasUserEmail(String email) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("user").get("email"), email);
+        return (root, query, criteriaBuilder) -> {
+            if (Long.class != query.getResultType()) {
+                root.fetch("account", JoinType.LEFT);
+                root.fetch("category", JoinType.LEFT);
+            }
+            return criteriaBuilder.equal(root.get("user").get("email"), email);
+        };
     }
 
     public static Specification<Transaction> hasType(TransactionType type) {

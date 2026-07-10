@@ -125,7 +125,7 @@ public class TransactionService {
             spec = spec.and(TransactionSpecification.hasCategorytId(categoryId));
         }
 
-        if (start != null || end != null) {
+        if (start != null && end != null) {
 
             spec = spec.and(TransactionSpecification.betweenDates(start, end));
         }
