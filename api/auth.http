@@ -9,9 +9,9 @@ POST {{URL}}/auth/register
 Content-Type: application/json
 
 {
-    "firstName": "name",
-    "lastName": "lastname",
-    "email": "email2@test.com",
+    "firstName": "user_1",
+    "lastName": "user_1_lastname",
+    "email": "user_1@test.com",
     "password": "12345678"
 }
 
@@ -22,7 +22,7 @@ POST {{URL}}/auth/login
 Content-Type: application/json
 
 {
-    "email": "email@test.com",
+    "email": "user_1@test.com",
     "password": "12345678"
 }
 

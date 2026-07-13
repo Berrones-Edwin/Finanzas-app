@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.bitly.dtos.PageResponse;
@@ -31,6 +32,7 @@ import com.bitly.specifications.TransactionSpecification;
 
 import jakarta.persistence.EntityNotFoundException;
 
+@Service
 public class TransactionService {
 
     private final UserRepository userRepository;

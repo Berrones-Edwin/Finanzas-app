@@ -21,3 +21,10 @@ docker compose logs mysql
 
 # 3. Arranca tu app de Spring Boot
 ./mvnw spring-boot:run
+
+sudo systemctl start postgresql
+
+
+sudo systemctl stop postgresql
+
+ALTER USER postgres PASSWORD 'password';

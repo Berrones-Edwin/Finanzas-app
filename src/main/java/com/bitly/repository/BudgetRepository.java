@@ -19,7 +19,7 @@ public interface BudgetRepository extends JpaRepository<Budget, Long> {
     boolean existsByCategoryIdAndUserIdAndMonth(Long categoryId, Long userId, LocalDate month);
 
     @Query("SELECT b FROM Budget b WHERE b.user.id = :userId " +
-            "AND YEAR(b.month)= :year AND MONTH(b.MONTH) = :month")
+            "AND YEAR(b.month)= :year AND MONTH(b.month) = :month")
     Page<Budget> findByUserIdAndYearAndMonth(
             @Param("userId") Long userId,
             @Param("year") Integer year,

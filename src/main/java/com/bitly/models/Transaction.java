@@ -38,7 +38,7 @@ import lombok.Setter;
 @Table(name = "transactions",
     indexes = {
         @Index(name="idx_user_date",columnList = "user_id,date"),
-        @Index(name="idx_user_type",columnList = "user_id,type")
+        @Index(name="idx_user_transaction_type",columnList = "user_id,transaction_type")
     }
 )
 @SQLDelete(sql = "UPDATE transactions SET deleted_at =NOW() WHERE id = ?")
@@ -63,7 +63,7 @@ public class Transaction extends BaseEntity {
     private Account account;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "type",nullable = false)
+    @Column(nullable = false)
     @Builder.Default
     private TransactionType transactionType = TransactionType.INCOME;
 

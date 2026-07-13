@@ -56,7 +56,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
                         SELECT
                                 c.id,
                                 c.name,
-                                COALSECE(SUM(t.amount),0)
+                                COALESCE(SUM(t.amount),0)
                         FROM Transaction t
                         JOIN t.category c
                         WHERE t.user.id = :userId
@@ -95,8 +95,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
 
         @Query("""
                         SELECT
-                        t.year,
-                        t.month,
+                        YEAR(t.date), 
+                        MONTH(t.date),
                         COALESCE(
                                 SUM(CASE
                                 WHEN t.transactionType ='INCOME'
@@ -115,8 +115,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
                         FROM Transaction t
                         WHERE t.user.id = :userId
                         AND t.date BETWEEN :start AND :end
-                        GROUP BY YEAR(t.year), MONTH(t.month)
-                        ORDER BY YEAR(t.year), MONTH(t.month)
+                        GROUP BY YEAR(t.date), MONTH(t.date)
+                        ORDER BY YEAR(t.date), MONTH(t.date)
                         """)
         List<DashboardTrendsResponse> findMonthlyTrends(
                         @Param("userId") Long userId,

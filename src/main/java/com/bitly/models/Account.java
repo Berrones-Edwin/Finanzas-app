@@ -58,7 +58,7 @@ public class Account extends BaseEntity {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
+    @Column(nullable = false)
     @Builder.Default
     private AccountType accountType = AccountType.BANK;
 
