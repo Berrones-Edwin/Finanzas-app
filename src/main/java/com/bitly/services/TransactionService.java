@@ -1,5 +1,6 @@
 package com.bitly.services;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -110,8 +111,8 @@ public class TransactionService {
             TransactionType type,
             Long accountId,
             Long categoryId,
-            LocalDateTime start,
-            LocalDateTime end) {
+            LocalDate start,
+            LocalDate end) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 

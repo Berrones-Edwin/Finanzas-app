@@ -1,5 +1,6 @@
 package com.bitly.specifications;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.springframework.data.jpa.domain.Specification;
@@ -45,13 +46,13 @@ public class TransactionSpecification {
         };
     }
 
-    public static Specification<Transaction> betweenDates(LocalDateTime start, LocalDateTime end) {
+    public static Specification<Transaction> betweenDates(LocalDate start, LocalDate end) {
 
         return (root, query, criteriaBuilder) -> {
 
             if (start == null || end == null)
                 return null;
-            return criteriaBuilder.between(root.get("createdAt"), start, end);
+            return criteriaBuilder.between(root.get("date"), start, end);
 
         };
     }

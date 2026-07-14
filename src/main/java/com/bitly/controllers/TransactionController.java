@@ -1,7 +1,8 @@
 package com.bitly.controllers;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -40,8 +41,8 @@ public class TransactionController {
             @RequestParam(name = "type", required = false) TransactionType type,
             @RequestParam(name = "accountId", required = false) Long accountId,
             @RequestParam(name = "categoryId", required = false) Long categoryId,
-            @RequestParam(name = "start", required = false) LocalDateTime start,
-            @RequestParam(name = "end", required = false) LocalDateTime end) {
+            @RequestParam(name = "start", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+            @RequestParam(name = "end", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
         return ResponseEntity.ok(
                 transactionService.getTransactions(userDetails.getUsername(), page, size, type, accountId, categoryId,
                         start, end));

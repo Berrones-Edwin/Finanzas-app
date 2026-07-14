@@ -1,7 +1,7 @@
 package com.bitly.services;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -62,8 +62,8 @@ public class TransferService {
             int page,
             int size,
             Long accountId,
-            LocalDateTime start,
-            LocalDateTime end) {
+            LocalDate start,
+            LocalDate end) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
