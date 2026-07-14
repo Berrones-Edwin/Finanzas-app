@@ -1,0 +1,41 @@
+@TOKEN=eyJhbGciOiJIUzM4NCJ9.eyJmdWxsbmFtZSI6Im5hbWUgbGFzdG5hbWUiLCJzdWIiOiJlbWFpbEB0ZXN0LmNvbSIsImlhdCI6MTc4MTgxOTE5MCwiZXhwIjoxNzgxOTA1NTkwLCJhdXRob3JpdGllcyI6WyJST0xFX0NMSUVOVCJdfQ.AdiSME39mRYq81LqWkH3ed2izkgn6gtwAOQbzZutwlCODahq5be3HwkRG0OCgvzp
+@URL=http://localhost:8080/api/v1/budgets
+
+
+
+### Get All budget
+GET {{URL}}
+Authorization: Bearer {{TOKEN}}
+
+### Get Single account
+GET {{URL}}/1
+Authorization: Bearer {{TOKEN}}
+
+
+### CREAR budget
+POST {{URL}}
+Authorization: Bearer {{TOKEN}}
+Content-Type: application/json
+
+{
+    "categpryId":1,
+    "month":"2026-07-14",
+    "amount":500,
+    "alertThreshold":"70",
+    "notes":"My first budget"
+}
+
+### update ACCOUNT
+PATCH {{URL}}/1
+Authorization: Bearer {{TOKEN}}
+Content-Type: application/json
+{
+    "amount":500,
+    "alertThreshold":"70",
+    "notes":"My first budget"
+}
+
+### delete  account
+DELETE {{URL}}/2
+Authorization: Bearer {{TOKEN}}
+

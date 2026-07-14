@@ -1,5 +1,5 @@
 
-@TOKEN=eyJhbGciOiJIUzM4NCJ9.eyJmdWxsbmFtZSI6Im5hbWUgbGFzdG5hbWUiLCJzdWIiOiJlbWFpbEB0ZXN0LmNvbSIsImlhdCI6MTc4MTgxOTE5MCwiZXhwIjoxNzgxOTA1NTkwLCJhdXRob3JpdGllcyI6WyJST0xFX0NMSUVOVCJdfQ.AdiSME39mRYq81LqWkH3ed2izkgn6gtwAOQbzZutwlCODahq5be3HwkRG0OCgvzp
+@TOKEN=eyJhbGciOiJIUzM4NCJ9.eyJmdWxsbmFtZSI6IlVzdWFyaW8gVW5vIHVzdWFyaW8gdW5vIiwic3ViIjoidXNlcjFAdGVzdC5jb20iLCJpYXQiOjE3ODQwNDY5MDEsImV4cCI6MTc4NDEzMzMwMSwiYXV0aG9yaXRpZXMiOlsiUk9MRV9DTElFTlQiXX0.QqNRZXbuq-rJ8FWmvl9tyoyz2o6PegzTK2kort-L8XXk3FpGjdgwqYI9FJOyJIHS
 @URL=http://localhost:8080/api/v1
 
 
@@ -22,7 +22,7 @@ POST {{URL}}/auth/login
 Content-Type: application/json
 
 {
-    "email": "user_1@test.com",
+    "email": "user1@test.com",
     "password": "12345678"
 }
 
