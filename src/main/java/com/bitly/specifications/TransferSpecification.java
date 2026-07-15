@@ -1,6 +1,6 @@
 package com.bitly.specifications;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import org.springframework.data.jpa.domain.Specification;
 
@@ -32,7 +32,7 @@ if (Long.class != query.getResultType()) {
         };
     }
 
-     public static Specification<Transfer> betweenDates(LocalDateTime start, LocalDateTime end) {
+     public static Specification<Transfer> betweenDates(LocalDate start, LocalDate end) {
 
         return (root, query, criteriaBuilder) -> {
 
