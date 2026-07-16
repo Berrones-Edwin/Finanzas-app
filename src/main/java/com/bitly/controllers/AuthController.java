@@ -8,6 +8,7 @@ import com.bitly.dtos.AuthenticationResponse;
 import com.bitly.dtos.ReqisterRequest;
 import com.bitly.services.AuthService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RequestMapping("/api/v1/auth")
 @RestController
+@Tag(name = "Authentication")
 public class AuthController {
 
 

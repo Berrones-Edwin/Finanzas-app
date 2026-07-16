@@ -28,3 +28,8 @@ sudo systemctl start postgresql
 sudo systemctl stop postgresql
 
 ALTER USER postgres PASSWORD 'password';
+
+
+# OPEN API
+http://localhost:8080/swagger-ui/index.html
+http://localhost:8080/v3/api-docs

@@ -10,6 +10,7 @@ import com.bitly.dtos.AccountUpdateRequest;
 import com.bitly.dtos.PageResponse;
 import com.bitly.services.AccountService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RequestMapping("/api/v1/accounts")
 @RestController
+@Tag(name = "Account")
 public class AccountController {
 
     private final AccountService accountService;

@@ -21,10 +21,12 @@ import com.bitly.dtos.transfers.TransferCreateRequest;
 import com.bitly.dtos.transfers.TransferResponse;
 import com.bitly.services.TransferService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RequestMapping("/api/v1/transfers")
 @RestController
+@Tag(name = "Transfer")
 public class TransferController {
 
     private final TransferService transferService;

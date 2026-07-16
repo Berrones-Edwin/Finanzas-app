@@ -9,6 +9,7 @@ import com.bitly.dtos.CategoryResponse;
 import com.bitly.dtos.PageResponse;
 import com.bitly.services.CategoryService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RequestMapping("/api/v1/categories")
 @RestController
+@Tag(name = "Category")
 public class CategoryController {
 
     private final CategoryService categoryService;

@@ -20,10 +20,12 @@ import com.bitly.dtos.budgets.BudgetResponse;
 import com.bitly.dtos.budgets.BudgetUpdateRequest;
 import com.bitly.services.BudgetService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RequestMapping("/api/v1/budgets")
 @RestController
+@Tag(name = "Budget")
 public class BudgetController {
 
     private final BudgetService budgetService;

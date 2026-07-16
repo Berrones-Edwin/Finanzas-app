@@ -21,10 +21,12 @@ import com.bitly.dtos.transactions.TransactionResponse;
 import com.bitly.enums.TransactionType;
 import com.bitly.services.TransactionService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RequestMapping("/api/v1/transactions")
 @RestController
+@Tag(name = "Transaction")
 public class TransactionController {
 
     private final TransactionService transactionService;

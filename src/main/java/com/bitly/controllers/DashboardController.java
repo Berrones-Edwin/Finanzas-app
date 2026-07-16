@@ -18,8 +18,11 @@ import com.bitly.dtos.dashboard.DashboardSummaryResponse;
 import com.bitly.dtos.dashboard.DashboardTrendsResponse;
 import com.bitly.services.DashboardService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RequestMapping("/api/v1/dashboard")
 @RestController
+@Tag(name = "Dashboard")
 public class DashboardController {
 
     private final DashboardService dashboardService;
