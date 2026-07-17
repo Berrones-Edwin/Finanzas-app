@@ -21,7 +21,9 @@ import com.bitly.repository.CategoryRepository;
 import com.bitly.repository.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class CategoryService {
 
@@ -95,6 +97,12 @@ public class CategoryService {
 
                 Category categorySaved = categoryRepository.save(c);
 
+                log.info("Category created. userId={}, categoryId={}, name={}, type={}",
+                        user.getId(),
+                        categorySaved.getId(),
+                        categorySaved.getName(),
+                        categorySaved.getCategoryType()
+                );
                 return categoryMapper.toDTO(categorySaved);
 
         }
@@ -124,6 +132,13 @@ public class CategoryService {
 
                 Category categoryUpdate = categoryRepository.save(c);
 
+                 log.info("Category updated. userId={}, categoryId={}, name={}, type={}",
+                        user.getId(),
+                        categoryUpdate.getId(),
+                        categoryUpdate.getName(),
+                        categoryUpdate.getCategoryType()
+                );
+
                 return categoryMapper.toDTO(categoryUpdate);
 
         }
@@ -135,6 +150,15 @@ public class CategoryService {
                                 .orElseThrow(() -> new EntityNotFoundException("Category was not found with id " + id));
 
                 categoryRepository.delete(category);
+
+                
+                 log.info("Category updated. userId={}, categoryId={}, name={}, type={}",
+                        category.getUser().getId(),
+                        category.getId(),
+                        category.getName(),
+                        category.getCategoryType()
+                );
+
 
         }
 

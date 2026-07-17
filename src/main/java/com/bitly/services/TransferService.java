@@ -27,149 +27,171 @@ import com.bitly.repository.UserRepository;
 import com.bitly.specifications.TransferSpecification;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class TransferService {
 
-    private final TransferRepository transferRepository;
-    private final TransferMapper transferMapper;
-    private final UserRepository userRepository;
-    private final AccountRepository accountRepository;
+        private final TransferRepository transferRepository;
+        private final TransferMapper transferMapper;
+        private final UserRepository userRepository;
+        private final AccountRepository accountRepository;
 
-    public TransferService(
-            TransferRepository transferRepository,
-            TransferMapper transferMapper,
-            UserRepository userRepository,
-            AccountRepository accountRepository) {
-        this.transferRepository = transferRepository;
-        this.transferMapper = transferMapper;
-        this.userRepository = userRepository;
-        this.accountRepository = accountRepository;
-    }
-
-    @Transactional(readOnly = true)
-    public TransferResponse getTransferById(Long id, String username) {
-
-        Transfer transfer = transferRepository.findByIdAndUserEmail(id, username)
-                .orElseThrow(() -> new EntityNotFoundException("Transfer not found with id " + id));
-
-        return transferMapper.toDTO(transfer);
-    }
-
-    @Transactional(readOnly = true)
-    public PageResponse<TransferResponse> getTransfer(
-            String username,
-            int page,
-            int size,
-            Long accountId,
-            LocalDate start,
-            LocalDate end) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-
-        Specification<Transfer> spec = Specification.where(TransferSpecification.hasUserEmail(username));
-
-        if (accountId != null) {
-            spec = spec.and(TransferSpecification.hasAccountId(accountId));
+        public TransferService(
+                        TransferRepository transferRepository,
+                        TransferMapper transferMapper,
+                        UserRepository userRepository,
+                        AccountRepository accountRepository) {
+                this.transferRepository = transferRepository;
+                this.transferMapper = transferMapper;
+                this.userRepository = userRepository;
+                this.accountRepository = accountRepository;
         }
 
-        if (start != null && end != null) {
+        @Transactional(readOnly = true)
+        public TransferResponse getTransferById(Long id, String username) {
 
-            spec = spec.and(TransferSpecification.betweenDates(start, end));
+                Transfer transfer = transferRepository.findByIdAndUserEmail(id, username)
+                                .orElseThrow(() -> new EntityNotFoundException("Transfer not found with id " + id));
+
+                return transferMapper.toDTO(transfer);
         }
 
-        Page<Transfer> transferPage = transferRepository.findAll(spec, pageable);
+        @Transactional(readOnly = true)
+        public PageResponse<TransferResponse> getTransfer(
+                        String username,
+                        int page,
+                        int size,
+                        Long accountId,
+                        LocalDate start,
+                        LocalDate end) {
 
-        List<TransferResponse> content = transferPage.stream()
-                .map(transferMapper::toDTO)
-                .toList();
+                Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-        return new PageResponse<>(
-                content,
-                transferPage.getNumber(),
-                transferPage.getSize(),
-                transferPage.getTotalElements(),
-                transferPage.getTotalPages(),
-                transferPage.isFirst(),
-                transferPage.isLast());
-    }
+                Specification<Transfer> spec = Specification.where(TransferSpecification.hasUserEmail(username));
 
-    @Transactional
-    public TransferResponse saveTransfer(String username, TransferCreateRequest request) {
+                if (accountId != null) {
+                        spec = spec.and(TransferSpecification.hasAccountId(accountId));
+                }
 
-        User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User was not found"));
+                if (start != null && end != null) {
 
-        Account fromAccount = accountRepository.findByIdAndUserIdForUpdate(request.fromAccount(), username)
-                .orElseThrow(
-                        () -> new EntityNotFoundException("Origin Account not found with id " + request.fromAccount()));
+                        spec = spec.and(TransferSpecification.betweenDates(start, end));
+                }
 
-        Account toAccount = accountRepository.findByIdAndUserIdForUpdate(request.toAccount(), username)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Destination Account not found with id " + request.fromAccount()));
+                Page<Transfer> transferPage = transferRepository.findAll(spec, pageable);
 
-        if (fromAccount.getId().equals(toAccount.getId())) {
+                List<TransferResponse> content = transferPage.stream()
+                                .map(transferMapper::toDTO)
+                                .toList();
 
-            throw new IllegalArgumentException("Source and Destination account cannot be the same");
+                return new PageResponse<>(
+                                content,
+                                transferPage.getNumber(),
+                                transferPage.getSize(),
+                                transferPage.getTotalElements(),
+                                transferPage.getTotalPages(),
+                                transferPage.isFirst(),
+                                transferPage.isLast());
         }
 
-        if (fromAccount.getBalance().compareTo(request.amount()) < 0) {
-            throw new InsufficientFundsException("You do not have enough money in your account");
+        @Transactional
+        public TransferResponse saveTransfer(String username, TransferCreateRequest request) {
+
+                User user = userRepository.findByEmail(username)
+                                .orElseThrow(() -> new UsernameNotFoundException("User was not found"));
+
+                Account fromAccount = accountRepository.findByIdAndUserIdForUpdate(request.fromAccount(), username)
+                                .orElseThrow(
+                                                () -> new EntityNotFoundException("Origin Account not found with id "
+                                                                + request.fromAccount()));
+
+                Account toAccount = accountRepository.findByIdAndUserIdForUpdate(request.toAccount(), username)
+                                .orElseThrow(() -> new EntityNotFoundException(
+                                                "Destination Account not found with id " + request.fromAccount()));
+
+                if (fromAccount.getId().equals(toAccount.getId())) {
+
+                        log.warn("Transfer failed. Illegal Arguments. fromAccount={}, toAccount={}, amount={}, userId={}",
+                                        fromAccount.getId(),
+                                        toAccount.getId(),
+                                        request.amount(),
+                                        user.getId());
+                        throw new IllegalArgumentException("Source and Destination account cannot be the same");
+                }
+
+                if (fromAccount.getBalance().compareTo(request.amount()) < 0) {
+                        throw new InsufficientFundsException("You do not have enough money in your account");
+                }
+
+                fromAccount.setBalance(fromAccount.getBalance().subtract(request.amount()));
+
+                toAccount.setBalance(toAccount.getBalance().add(request.amount()));
+
+                Transfer transfer = Transfer.builder()
+                                .user(user)
+                                .fromAccount(fromAccount)
+                                .toAccount(toAccount)
+                                .amount(request.amount())
+                                .description(request.description())
+                                .date(request.date())
+                                .build();
+
+                Transfer savedTransfer = transferRepository.save(transfer);
+
+                log.info("Transfer completed. fromAccount={}, toAccount={}, amount={}, userId={}",
+                                fromAccount.getId(),
+                                toAccount.getId(),
+                                request.amount(),
+                                user.getId());
+
+                return transferMapper.toDTO(savedTransfer);
         }
 
-        fromAccount.setBalance(fromAccount.getBalance().subtract(request.amount()));
+        @Transactional
+        public void deleteTransfer(Long id, String username) {
 
-        toAccount.setBalance(toAccount.getBalance().add(request.amount()));
+                Transfer transfer = transferRepository.findByIdAndUserEmail(id, username)
+                                .orElseThrow(() -> new EntityNotFoundException("Transfer not found with id " + id));
 
-        Transfer transfer = Transfer.builder()
-                .user(user)
-                .fromAccount(fromAccount)
-                .toAccount(toAccount)
-                .amount(request.amount())
-                .description(request.description())
-                .date(request.date())
-                .build();
+                BigDecimal amount = transfer.getAmount();
+                Long fromAccountId = transfer.getFromAccount().getId();
+                Long toAccountId = transfer.getToAccount().getId();
 
-        Transfer savedTransfer = transferRepository.save(transfer);
+                Account fromAccount;
+                Account toAccount;
 
-        return transferMapper.toDTO(savedTransfer);
-    }
+                if (fromAccountId < toAccountId) {
+                        fromAccount = accountRepository.findByIdAndUserIdForUpdate(fromAccountId, username)
+                                        .orElseThrow(
+                                                        () -> new EntityNotFoundException(
+                                                                        "Origin Account not found with id "
+                                                                                        + fromAccountId));
+                        toAccount = accountRepository.findByIdAndUserIdForUpdate(toAccountId, username)
+                                        .orElseThrow(
+                                                        () -> new EntityNotFoundException(
+                                                                        "Destination Account not found with id "
+                                                                                        + toAccountId));
+                } else {
+                        toAccount = accountRepository.findByIdAndUserIdForUpdate(toAccountId, username)
+                                        .orElseThrow(
+                                                        () -> new EntityNotFoundException(
+                                                                        "Destination Account not found with id "
+                                                                                        + toAccountId));
+                        fromAccount = accountRepository.findByIdAndUserIdForUpdate(fromAccountId, username)
+                                        .orElseThrow(
+                                                        () -> new EntityNotFoundException(
+                                                                        "Origin Account not found with id "
+                                                                                        + fromAccountId));
+                }
 
-    @Transactional
-    public void deleteTransfer(Long id, String username) {
+                fromAccount.setBalance(fromAccount.getBalance().add(amount));
 
-        Transfer transfer = transferRepository.findByIdAndUserEmail(id, username)
-                .orElseThrow(() -> new EntityNotFoundException("Transfer not found with id " + id));
+                toAccount.setBalance(toAccount.getBalance().subtract(amount));
 
-        BigDecimal amount = transfer.getAmount();
-        Long fromAccountId = transfer.getFromAccount().getId();
-        Long toAccountId = transfer.getToAccount().getId();
+                transferRepository.delete(transfer);
 
-        Account fromAccount;
-        Account toAccount;
-
-        if (fromAccountId < toAccountId) {
-            fromAccount = accountRepository.findByIdAndUserIdForUpdate(fromAccountId, username)
-                    .orElseThrow(
-                            () -> new EntityNotFoundException("Origin Account not found with id " + fromAccountId));
-            toAccount = accountRepository.findByIdAndUserIdForUpdate(toAccountId, username)
-                    .orElseThrow(
-                            () -> new EntityNotFoundException("Destination Account not found with id " + toAccountId));
-        } else {
-            toAccount = accountRepository.findByIdAndUserIdForUpdate(toAccountId, username)
-                    .orElseThrow(
-                            () -> new EntityNotFoundException("Destination Account not found with id " + toAccountId));
-            fromAccount = accountRepository.findByIdAndUserIdForUpdate(fromAccountId, username)
-                    .orElseThrow(
-                            () -> new EntityNotFoundException("Origin Account not found with id " + fromAccountId));
         }
-
-        fromAccount.setBalance(fromAccount.getBalance().add(amount));
-
-        toAccount.setBalance(toAccount.getBalance().subtract(amount));
-
-        transferRepository.delete(transfer);
-
-    }
 
 }

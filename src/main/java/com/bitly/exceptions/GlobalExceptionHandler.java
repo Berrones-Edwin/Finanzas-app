@@ -11,11 +11,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-        
         private ProblemDetail createProblem(
                         HttpStatus status,
                         String detail,
@@ -31,7 +32,7 @@ public class GlobalExceptionHandler {
                 problem.setProperty("path", request.getRequestURI());
                 problem.setProperty("timestamp", LocalDateTime.now());
 
-                if(errors != null &&!errors.isEmpty()){
+                if (errors != null && !errors.isEmpty()) {
                         problem.setProperty("errors", errors);
                 }
 
@@ -44,7 +45,7 @@ public class GlobalExceptionHandler {
                         HttpServletRequest request) {
 
                 return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(
-                                createProblem(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage(), request,null));
+                                createProblem(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage(), request, null));
         }
 
         @ExceptionHandler({
@@ -61,7 +62,7 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                                 .body(
-                                                createProblem(HttpStatus.CONFLICT, ex.getMessage(), request,null));
+                                                createProblem(HttpStatus.CONFLICT, ex.getMessage(), request, null));
         }
 
         @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -69,7 +70,7 @@ public class GlobalExceptionHandler {
                         MethodArgumentNotValidException ex,
                         HttpServletRequest request) {
 
-                var errors = new LinkedHashMap<String,String>();
+                var errors = new LinkedHashMap<String, String>();
 
                 ex.getBindingResult().getFieldErrors()
                                 .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
@@ -83,12 +84,14 @@ public class GlobalExceptionHandler {
                         Exception ex,
                         HttpServletRequest request) {
 
+                log.error("Internal server error, message={}", ex.getMessage());
+
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                 .body(
                                                 createProblem(HttpStatus.INTERNAL_SERVER_ERROR,
                                                                 "An unexpected error ocurred",
                                                                 request,
-                                                        null));
+                                                                null));
         }
 
 }

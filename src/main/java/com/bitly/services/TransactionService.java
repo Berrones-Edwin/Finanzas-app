@@ -32,7 +32,9 @@ import com.bitly.repository.UserRepository;
 import com.bitly.specifications.TransactionSpecification;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class TransactionService {
 
@@ -83,7 +85,25 @@ public class TransactionService {
 
         try {
             accountRepository.saveAndFlush(account);
+            log.info(
+                    "Transaction created. userId={}, transactionId={}, type={}, amount={}, accountId={}, categoryId={}",
+                    user.getId(),
+                    request.accountId(),
+                    request.transactionType(),
+                    request.amount(),
+                    account.getId(),
+                    category.getId());
         } catch (ObjectOptimisticLockingFailureException ex) {
+
+            log.warn(
+                    "Optimistic locking conflict. userId={}, transactionId={}, type={}, amount={}, accountId={}, categoryId={}",
+                    user.getId(),
+                    request.accountId(),
+                    request.transactionType(),
+                    request.amount(),
+                    account.getId(),
+                    category.getId());
+
             throw new AccountConflictException("The account was modified concurrently, please retry");
         }
 

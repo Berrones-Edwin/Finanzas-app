@@ -19,7 +19,9 @@ import com.bitly.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class AuthService {
 
@@ -34,7 +36,7 @@ public class AuthService {
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
             JwtService jwtService,
-        TokenRepository tokenRepository) {
+            TokenRepository tokenRepository) {
 
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
@@ -44,19 +46,23 @@ public class AuthService {
 
     }
 
+    @Transactional
     public void registerUser(ReqisterRequest request) {
 
         User user = User.builder()
                 .firstName(request.getFirstName())
-                .lastName(request.getLastName())                
+                .lastName(request.getLastName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
 
         userRepository.save(user);
 
+        log.info("User registered successfully. User with id ={}", user.getId());
+
     }
 
+    @Transactional
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
 
         var auth = authenticationManager.authenticate(
@@ -78,24 +84,30 @@ public class AuthService {
 
         tokenRepository.save(tokenEntity);
 
+        log.info("User logged in. UserId={}",
+                user.getId());
+
         return AuthenticationResponse.builder().token(jwtToken).build();
     }
 
     @Transactional
-    public void logout(HttpServletRequest  logoutRequest){
-
+    public void logout(HttpServletRequest logoutRequest) {
 
         String authHeader = logoutRequest.getHeader(HttpHeaders.AUTHORIZATION);
 
-        if(authHeader != null && authHeader.startsWith("Bearer ")){
-            
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+
             String jwt = authHeader.substring(7);
 
             Token token = tokenRepository.findByToken(jwt)
-            .orElseThrow(()->new IllegalArgumentException("Token was not found"));
-    
+                    .orElseThrow(() -> new IllegalArgumentException("Token was not found"));
+
             token.setRevoked(true);
             token.setValidatedAt(LocalDateTime.now());
+
+            log.info("User logged out. userId={}, tokenId={}",
+                    token.getUser().getId(),
+                    token.getId());
         }
     }
 }

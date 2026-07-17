@@ -27,7 +27,9 @@ import com.bitly.repository.TransactionRepository;
 import com.bitly.repository.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class BudgetService {
 
@@ -141,11 +143,17 @@ public class BudgetService {
                                 .build();
 
                 Budget saved = budgetRepository.save(budget);
+
+                log.info("Budget Created. userId={}, budgetId={}, amount={}, categoryId={}",
+                                user.getId(),
+                                saved.getId(),
+                                saved.getAmount(),
+                                category.getId());
                 return budgetMapper.toDTO(saved, BigDecimal.ZERO);
         }
 
         @Transactional
-        public BudgetResponse updateBudget(String username, BudgetUpdateRequest request,Long id ) {
+        public BudgetResponse updateBudget(String username, BudgetUpdateRequest request, Long id) {
 
                 Budget budget = budgetRepository.findByIdAndUserEmail(id, username)
                                 .orElseThrow(() -> new EntityNotFoundException("Budget not found with id " + id));
@@ -160,6 +168,11 @@ public class BudgetService {
 
                 Budget updated = budgetRepository.save(budget);
 
+                log.info("Budget Updated. userId={}, budgetId={}, amount={}, categoryId={}",
+                                budget.getUser().getId(),
+                                updated.getId(),
+                                updated.getAmount(),
+                                updated.getCategory().getId());
 
                 return budgetMapper.toDTO(updated, getSumExpenseAmount(budget));
         }
@@ -171,6 +184,11 @@ public class BudgetService {
                                 .orElseThrow(() -> new EntityNotFoundException("Budget not found with id " + id));
 
                 budgetRepository.delete(budget);
+                log.info("Budget Deleted. userId={}, budgetId={}, amount={}, categoryId={}",
+                                budget.getUser().getId(),
+                                budget.getId(),
+                                budget.getAmount(),
+                                budget.getCategory().getId());
 
         }
 }

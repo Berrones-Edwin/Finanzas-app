@@ -25,8 +25,11 @@ import com.bitly.repository.AccountRepository;
 import com.bitly.repository.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 public class AccountService {
 
@@ -111,6 +114,12 @@ public class AccountService {
 
                 Account newAccount = accountRepository.save(account);
 
+                log.info(
+                                "Account created. userId={}, accountId={}, accountName={}",
+                                user.getId(),
+                                newAccount.getId(),
+                                newAccount.getName());
+
                 return accountMapper.toDTO(newAccount);
         }
 
@@ -138,14 +147,26 @@ public class AccountService {
                                 accountMapper.toCurrency(request.currency()));
                 existAccount.setColor(request.color());
 
-
                 try {
-                        
+
                         Account accountUpdated = accountRepository.saveAndFlush(existAccount);
+                        log.info(
+                                "Account updated. userId={}, accountId={}, accountName={}",
+                                user.getId(),
+                                existAccount.getId(),
+                                existAccount.getName());
+
                         return accountMapper.toDTO(accountUpdated);
                 } catch (ObjectOptimisticLockingFailureException ex) {
-           
-                        throw new AccountConflictException("The account was modified by another operation. please retry.");
+
+                        log.warn(
+                                "Optimistic locking conflict. userId={}, accountId={}, accountName={}",
+                                user.getId(),
+                                existAccount.getId(),
+                                existAccount.getName());
+
+                        throw new AccountConflictException(
+                                        "The account was modified by another operation. please retry.");
                 }
 
         }
@@ -158,6 +179,11 @@ public class AccountService {
 
                 account.setActive(false);
                 accountRepository.delete(account);
+                log.info(
+                                "Account deleted. userId={}, accountId={}, accountName={}",
+                                account.getUser().getId(),
+                                account.getId(),
+                                account.getName());
         }
 
         @Transactional(readOnly = true)
@@ -166,7 +192,7 @@ public class AccountService {
                 var response = accountRepository.getBalance(username, id)
                                 .orElseThrow(() -> new EntityNotFoundException("Account not found or unauthorized"));
 
-                        return new AccountBalanceResponse(response.getBalance(), response.getCurrency().getCurrencyCode());
+                return new AccountBalanceResponse(response.getBalance(), response.getCurrency().getCurrencyCode());
 
         }
 
