@@ -3,6 +3,7 @@ package com.bitly.controllers;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,6 +34,7 @@ public class DashboardController {
 
     }
 
+    @Cacheable(value = "dashboard-summary",key="'dashboard-summary'")
     @GetMapping("/summary")
     public ResponseEntity<DashboardSummaryResponse> getSummary(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -44,6 +46,7 @@ public class DashboardController {
         return ResponseEntity.ok(dashboardService.getDashboardSummary(userDetails.getUsername(), start, end));
     }
 
+    @Cacheable(value = "dashboard-by-category",key="'dashboard-by-category'")
     @GetMapping("/by-category")
     public ResponseEntity<List<DashboardByCategoryResponse>> getExpensesByCategory(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -54,6 +57,8 @@ public class DashboardController {
         return ResponseEntity.ok(dashboardService.getExpensesByCategory(userDetails.getUsername(), start, end));
     }
 
+
+    @Cacheable(value = "dashboard-monthly-trends",key="'dashboard-monthly-trends'")
     @GetMapping("/monthly-trends")
     public ResponseEntity<List<DashboardTrendsResponse>> getMonthlyTrends(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -64,6 +69,7 @@ public class DashboardController {
         return ResponseEntity.ok(dashboardService.getMonthlyTrends(userDetails.getUsername(), start, end));
     }
 
+    @Cacheable(value = "dashboard-by-account",key="'dashboard-by-account'")
     @GetMapping("/by-account")
     public ResponseEntity<List<DashboardByAccountResponse>> getBalanceByAccount(
             @AuthenticationPrincipal UserDetails userDetails,
