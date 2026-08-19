@@ -25,7 +25,7 @@ public class SecurityConfig {
 
         private final JwtFilter jwtAuthFilter;
         private final AuthenticationProvider authenticationProvider;
-        
+
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 
@@ -62,7 +62,7 @@ public class SecurityConfig {
                 CorsConfiguration configuration = new CorsConfiguration();
 
                 configuration.setAllowCredentials(true);
-                configuration.addAllowedOrigin("http://localhost:5173");
+                configuration.addAllowedOrigin("http://localhost:3000");
                 configuration.addAllowedHeader("*");
                 configuration.addAllowedMethod("*");
 
