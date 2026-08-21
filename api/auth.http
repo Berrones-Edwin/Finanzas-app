@@ -1,5 +1,5 @@
 
-@TOKEN=eyJhbGciOiJIUzM4NCJ9.eyJmdWxsbmFtZSI6InRlc3RfMSB0ZXN0XzFfbGFzdG5hbWUiLCJzdWIiOiJ0ZXN0XzFAdGVzdC5jb20iLCJpYXQiOjE3ODU3NzY2NDgsImV4cCI6MTc4NTg2MzA0OCwiYXV0aG9yaXRpZXMiOlsiUk9MRV9DTElFTlQiXX0.k7UA8xJ8Gh-GM6T9gF45Owb3l_rg_IhSwar0Ok8R9rs0IHn-QoTewRimLYbUTF2P
+@TOKEN=eyJhbGciOiJIUzM4NCJ9.eyJmdWxsbmFtZSI6IlVzdWFyaW8gVW5vIHVzdWFyaW8gdW5vIiwic3ViIjoidXNlcjFAdGVzdC5jb20iLCJpYXQiOjE3ODU3Nzg3OTIsImV4cCI6MTc4NTg2NTE5MiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9DTElFTlQiXX0.YA6jHV9b1bRfvkbrjOYle5z3FlOd1unv2qGIdoAUHrPGzNFqlqyvMs5WhKDCqJcz
 @URL=http://localhost:8080/api/v1
 
 
@@ -11,8 +11,9 @@ Content-Type: application/json
 {
     "firstName": "test_1",
     "lastName": "test_1_lastname",
-    "email": "test_1@test.com",
-    "password": "12345678"
+    "email": "test_1@ttest-currency.com",
+    "password": "12345678",
+    "preferredCurrency":"MXN"
 }
 
 
@@ -22,7 +23,7 @@ POST {{URL}}/auth/login
 Content-Type: application/json
 
 {
-    "email": "test_1@test.com",
+    "email": "user1@test.com",
     "password": "12345678"
 }
 

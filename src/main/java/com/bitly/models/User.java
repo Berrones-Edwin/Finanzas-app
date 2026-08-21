@@ -12,6 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.bitly.enums.CurrencyEnum;
 import com.bitly.enums.UserRole;
 
 import jakarta.persistence.CascadeType;
@@ -58,6 +59,10 @@ public class User extends BaseEntity implements UserDetails, Principal {
     private String firstName;
 
     private String lastName;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "preferred_currency",length = 3)
+    private CurrencyEnum preferredCurrency;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)

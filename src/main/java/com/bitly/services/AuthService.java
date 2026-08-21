@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.bitly.dtos.AuthenticationRequest;
 import com.bitly.dtos.AuthenticationResponse;
 import com.bitly.dtos.ReqisterRequest;
+import com.bitly.enums.CurrencyEnum;
 import com.bitly.models.Token;
 import com.bitly.models.User;
 import com.bitly.repository.TokenRepository;
@@ -54,10 +55,10 @@ public class AuthService {
                 user.setLastName(request.getLastName());
                 user.setEmail(request.getEmail());
                 user.setPassword(
-                        passwordEncoder.encode(request.getPassword())
-                );
+                                passwordEncoder.encode(request.getPassword()));
                 user.setUpdatedBy(1L);
                 user.setCreatedBy(1L);
+                user.setPreferredCurrency(CurrencyEnum.valueOf(request.getPreferredCurrency()));
 
                 userRepository.save(user);
 
