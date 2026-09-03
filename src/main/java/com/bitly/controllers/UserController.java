@@ -24,7 +24,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping
+    @GetMapping("/me")
     public ResponseEntity<UserResponse> getUserInformation(
             @AuthenticationPrincipal UserDetails userDetails) {
 
