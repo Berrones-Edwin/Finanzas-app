@@ -1,5 +1,6 @@
 package com.bitly.services;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 
@@ -10,8 +11,11 @@ import org.springframework.stereotype.Service;
 
 import com.bitly.dtos.AuthenticationRequest;
 import com.bitly.dtos.AuthenticationResponse;
+import com.bitly.dtos.RefreshTokenRequest;
 import com.bitly.dtos.ReqisterRequest;
 import com.bitly.enums.CurrencyEnum;
+import com.bitly.enums.TokenType;
+import com.bitly.exceptions.RefreshTokenException;
 import com.bitly.models.Token;
 import com.bitly.models.User;
 import com.bitly.repository.TokenRepository;
@@ -76,22 +80,85 @@ public class AuthService {
 
                 var user = (User) auth.getPrincipal();
                 claims.put("fullname", user.getFullName());
-                var jwtToken = jwtService.generateToken(claims, user);
+
+                return issueTokenPair(user);
+        }
+
+        @Transactional
+        public AuthenticationResponse refreshToken(RefreshTokenRequest request) {
+
+                String providedRefresh = request.getRefreshToken();
+
+                Token stored = tokenRepository.findByTokenAndTokenType(providedRefresh, TokenType.REFRESH)
+                                .orElseThrow(() -> new RefreshTokenException("Invalid refresh token"));
+
+                if (stored.isRevoked() || stored.getExpiresAt().isBefore(LocalDateTime.now())) {
+                        log.warn("Refresh token rejected. tokenId={}, revoked={}, expired={}",
+                                        stored.getId(),
+                                        stored.isRevoked(),
+                                        stored.getExpiresAt().isBefore(LocalDateTime.now()));
+                        throw new RefreshTokenException("Refresh token has been revoked or expired");
+                }
+
+                User user = stored.getUser();
+
+                if (!jwtService.isRefreshToken(providedRefresh) || !user.getEmail().equals(jwtService.extractUsername(providedRefresh))) {
+                        throw new RefreshTokenException("Invalid refresh token");
+                }
+
+                if (jwtService.isTokenExpired(providedRefresh)) {
+                        throw new RefreshTokenException("Refresh token has expired");
+                }
+
+                stored.setRevoked(true);
+                stored.setValidatedAt(LocalDateTime.now());
+                tokenRepository.save(stored);
+
+                AuthenticationResponse response = issueTokenPair(user);
+
+                log.info("Tokens refreshed. userId={}", user.getId());
+
+                return response;
+        }
+
+        private AuthenticationResponse issueTokenPair(User user) {
+
+                var claims = new HashMap<String, Object>();
+                claims.put("fullname", user.getFullName());
+
+                String jwtToken = jwtService.generateToken(claims, user);
+                String refreshToken = jwtService.generateRefreshToken(claims, user);
+                LocalDateTime now = LocalDateTime.now();
 
                 Token tokenEntity = Token.builder()
                                 .token(jwtToken)
+                                .tokenType(TokenType.ACCESS)
                                 .user(user)
-                                .createdAt(LocalDateTime.now())
-                                .expiresAt(LocalDateTime.now().plusDays(1))
+                                .createdAt(now)
+                                .expiresAt(now.plus(Duration.ofMillis(jwtService.getJwtExpiration())))
                                 .revoked(false)
                                 .build();
 
                 tokenRepository.save(tokenEntity);
 
-                log.info("User logged in. UserId={}",
-                                user.getId());
+                Token refreshTokenEntity = Token.builder()
+                                .token(refreshToken)
+                                .tokenType(TokenType.REFRESH)
+                                .user(user)
+                                .createdAt(now)
+                                .expiresAt(now.plus(java.time.Duration.ofMillis(jwtService.getRefreshExpiration())))
+                                .revoked(false)
+                                .build();
 
-                return AuthenticationResponse.builder().token(jwtToken).build();
+                tokenRepository.save(refreshTokenEntity);
+
+                log.info("Token pair issued. userId={}, accessTokenId={}, refreshTokenId={}",
+                                user.getId(), tokenEntity.getId(), refreshTokenEntity.getId());
+
+                return AuthenticationResponse.builder()
+                                .token(jwtToken)
+                                .refreshToken(refreshToken)
+                                .build();
         }
 
         @Transactional

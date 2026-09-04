@@ -12,6 +12,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.bitly.enums.TokenType;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -24,6 +26,8 @@ public class JwtService {
     private String secretKey;
     @Value("${jwt.expiration}")
     private long jwtExpiration;
+    @Value("${refresh.expiration}")
+    private long jwtRefreshExpiration;
 
     public String generateToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
@@ -31,6 +35,14 @@ public class JwtService {
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public String extractTokenType(String token) {
+        return extractClaim(token, claims -> claims.get("tokenType", String.class));
+    }
+
+    public boolean isRefreshToken(String token) {
+        return TokenType.REFRESH.name().equals(extractTokenType(token));
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> claimResolver) {
@@ -48,13 +60,18 @@ public class JwtService {
     }
 
     public String generateToken(Map<String, Object> claims, UserDetails userDetails) {
-        return buildToken(claims, userDetails, jwtExpiration);
+        return buildToken(claims, userDetails, jwtExpiration, TokenType.ACCESS);
+    }
+
+    public String generateRefreshToken(Map<String, Object> claims, UserDetails userDetails) {
+        return buildToken(claims, userDetails, jwtRefreshExpiration, TokenType.REFRESH);
     }
 
     public String buildToken(
             Map<String, Object> claims,
             UserDetails userDetails,
-            long jwtExpiration
+            long jwtExpiration,
+            TokenType tokenType
 
     ) {
 
@@ -68,6 +85,7 @@ public class JwtService {
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .claim("tokenType", tokenType.name())
                 .claim("authorities", authorities)
                 .signWith(getSignInKey())
                 .compact();
@@ -81,9 +99,17 @@ public class JwtService {
 
     }
 
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
 
         return extractExpiration(token).before(new Date());
+    }
+
+    public long getRefreshExpiration() {
+        return jwtRefreshExpiration;
+    }
+
+    public long getJwtExpiration(){
+        return jwtExpiration;
     }
 
     private Date extractExpiration(String token) {

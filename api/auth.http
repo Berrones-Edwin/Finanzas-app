@@ -1,5 +1,8 @@
 
-@TOKEN=eyJhbGciOiJIUzM4NCJ9.eyJmdWxsbmFtZSI6IlVzdWFyaW8gVW5vIHVzdWFyaW8gdW5vIiwic3ViIjoidXNlcjFAdGVzdC5jb20iLCJpYXQiOjE3ODU3Nzg3OTIsImV4cCI6MTc4NTg2NTE5MiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9DTElFTlQiXX0.YA6jHV9b1bRfvkbrjOYle5z3FlOd1unv2qGIdoAUHrPGzNFqlqyvMs5WhKDCqJcz
+@TOKEN=eyJhbGciOiJIUzM4NCJ9.eyJmdWxsbmFtZSI6IlVzdWFyaW8gVW5vIHVzdWFyaW8gdW5vIiwic3ViIjoidXNlcjFAdGVzdC5jb20iLCJpYXQiOjE3ODg0NzEwMjIsImV4cCI6MTc4ODU1NzQyMiwidG9rZW5UeXBlIjoiQUNDRVNTIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9DTElFTlQiXX0.WE4ZOcKNGe8wutDmzlHKEs1CCpWC9JkLhqtQnOs-4co6K_M9ULKlDlp91CqffXza
+
+@REFRESH_TOKEN=eyJhbGciOiJIUzM4NCJ9.eyJmdWxsbmFtZSI6IlVzdWFyaW8gVW5vIHVzdWFyaW8gdW5vIiwic3ViIjoidXNlcjFAdGVzdC5jb20iLCJpYXQiOjE3ODg0NzA5OTcsImV4cCI6MTc4OTA3NTc5NywidG9rZW5UeXBlIjoiUkVGUkVTSCIsImF1dGhvcml0aWVzIjpbIlJPTEVfQ0xJRU5UIl19.j8FzRvsDlmph9kUUiRUpA1F6DTwhv29q5X0cc2X_iJUHsQfNLFbSe7JKzcwQL-Nq
+
 @URL=http://localhost:8080/api/v1
 
 
@@ -31,5 +34,14 @@ Content-Type: application/json
 
 POST {{URL}}/auth/logout
 Authorization: Bearer {{TOKEN}}
+
+### Refresh token (public, no Bearer required)
+
+POST {{URL}}/auth/refresh
+Content-Type: application/json
+
+{
+    "refreshToken": "{{REFRESH_TOKEN}}"
+}
 
 

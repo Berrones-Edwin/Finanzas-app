@@ -65,8 +65,16 @@ public class GlobalExceptionHandler {
                                                 createProblem(HttpStatus.CONFLICT, ex.getMessage(), request, null));
         }
 
-        @ExceptionHandler(MethodArgumentNotValidException.class)
-        public ResponseEntity<ProblemDetail> handleValidation(
+        @ExceptionHandler(RefreshTokenException.class)
+        public ResponseEntity<ProblemDetail> handleRefreshToken(
+                        RefreshTokenException ex,
+                        HttpServletRequest request) {
+
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                .body(createProblem(HttpStatus.UNAUTHORIZED, ex.getMessage(), request, null));
+        }
+
+        @ExceptionHandler(MethodArgumentNotValidException.class)        public ResponseEntity<ProblemDetail> handleValidation(
                         MethodArgumentNotValidException ex,
                         HttpServletRequest request) {
 

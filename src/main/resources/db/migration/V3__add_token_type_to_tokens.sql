@@ -1,0 +1,2 @@
+ALTER TABLE tokens
+ADD COLUMN token_type varchar(20) NOT NULL DEFAULT 'ACCESS';

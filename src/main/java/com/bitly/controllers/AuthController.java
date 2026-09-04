@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bitly.dtos.AuthenticationRequest;
 import com.bitly.dtos.AuthenticationResponse;
+import com.bitly.dtos.RefreshTokenRequest;
 import com.bitly.dtos.ReqisterRequest;
 import com.bitly.services.AuthService;
 
@@ -54,6 +55,13 @@ public class AuthController {
 
 
     
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthenticationResponse> refresh(
+        @RequestBody @Valid RefreshTokenRequest request
+    ){
+        return ResponseEntity.ok(userService.refreshToken(request));
+    }
+
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {
         
