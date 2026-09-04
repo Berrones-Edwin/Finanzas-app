@@ -5,8 +5,21 @@ Spring Boot REST backend for a personal finance app. Package root `com.bitly`, a
 ## Rules
 - Do not run a dev server or run builds unless expressly requested.
 - Do not delete files or folders without confirmation.
-- Do not install dependecies without asking.
+- Do not install dependencies without asking.
 - Do not perform irreversible actions without confirmation.
+
+## Local Resources & Skills
+- **Skills Directory:** Consult and trigger custom skills in `./.opencode/skills/` based on the task to be performed:
+  - Use `git-best-practices` for code hygiene, `.gitignore` validation, and Conventional Commit formatting.
+  - Use `create-pull-request` when ready to push changes and open a PR.
+
+## Branching & Workflow Rules
+- **NEVER implement changes directly on `main` or `master`.**
+- Before creating or modifying any code for a new feature, fix, or refactor:
+  1. Check the current git branch (`git status` or `git branch --show-current`).
+  2. If on `main` or `master`, automatically create and switch to a new branch following the format: `<type>/<short-kebab-description>` (e.g., `feat/add-user-login`, `fix/postgres-connection-leak`).
+  3. Perform all work exclusively on the new feature branch.
+- **Git Hygiene:** Never stage or commit temporary files, environment variables, or build outputs (`logs/`, `.vscode/`, `target/`, `.next/`, `.tmp/`, `.env*`, `application-local.*`).
 
 ## Run / build
 
@@ -41,8 +54,3 @@ Dashboard endpoints are cached (`@Cacheable`, `@EnableCaching`): caches defined 
 - Lombok enabled (`@Slf4j` etc.) — check for it before writing manual getters/loggers.
 - Logging guidance (from `improves/logging.md`): log meaningful business/security/error events at the **service** layer, not per-method in controllers; use INFO for completed ops, WARN for expected-but-notable (failed login, insufficient funds, budget exceeded), ERROR only for real system failures; never log passwords or full JWTs.
 - Rotating file logs go to `logs/` (gitignored) via `logback-spring.xml`; `com.bitly` logs at DEBUG.
-
-# Project Context and rules
-
-## Local Resources
-- **Work Skills** Consult the custom skills in `.opencode/skills/` baased on the task to be performed.

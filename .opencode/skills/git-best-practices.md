@@ -1,6 +1,6 @@
 ---
 name: git-best-practices
-description: Applies Conventional Commits standards, CHANGELOG.md updates, and security checks in .gitignore.
+description: Applies Conventional Commits standards and security checks in .gitignore.
 ---
 
 # Skill: Git Best Practices & Security Standard
@@ -37,5 +37,3 @@ When writing commit messages or updating change history, strictly follow the **C
 - `fix(chat): resolve memory leak in message listener`
 - `chore(deps): update opencode dependencies`
 
-### 3. Changelog Maintenance (CHANGELOG.md)
-- Upon completing a major feature or critical fix, update or create the `CHANGELOG.md` file, documenting changes under the sections: `Added`, `Changed`, `Fixed`, or `Removed`.
