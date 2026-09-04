@@ -12,9 +12,9 @@ Applies professional standards for version control management, sensitive data le
 
 ### 1. Version Control & Hygiene (.gitignore)
 - **Pre-check:** Before making any changes, commit, or staging, ensure that the `.gitignore` file contains and respects the exclusion of:
-  - Environment variables (`.env`, `.env.local`, `.env.*`).
-  - Dependency directories (`node_modules/`, `venv/`, `.venv/`, `vendor/`,).
-  - Temporary files and AI/editor state folders (`.opencode/`, `.cursor/`, `.tmp/`, `dist/`, `build/`,`.next/`).
+- Environment variables & credentials (`.env`, `.env.*`, `application-local.properties`, `application-local.yml`, `*.pem`, `*.key`).
+- Build output & dependency directories (`target/`, `build/`, `.gradle/`, `bin/`, `out/`).
+- Temporary files, logs, and AI/editor state folders (`logs/`, `.vscode/`, `.opencode/`, `.cursor/`, `.idea/`, `*.log`, `.tmp/`).
 - **Leak Prevention:** Never suggest, create, or include API keys, tokens, or credentials in Git-tracked files.
 
 ### 2. Commit Format (Conventional Commits)
