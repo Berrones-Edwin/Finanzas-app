@@ -1,5 +1,6 @@
 package com.bitly.dtos;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.bitly.enums.AccountType;
@@ -22,6 +23,7 @@ public class AccountResponse {
     private AccountType accountType;
     private String currency;
     private String color;
+    private BigDecimal balance;
     private LocalDateTime createdAt;
 
 }
