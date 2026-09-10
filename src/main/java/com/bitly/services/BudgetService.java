@@ -3,12 +3,14 @@ package com.bitly.services;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Year;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,7 @@ import com.bitly.repository.BudgetRepository;
 import com.bitly.repository.CategoryRepository;
 import com.bitly.repository.TransactionRepository;
 import com.bitly.repository.UserRepository;
+import com.bitly.specifications.BudgetSpecification;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -86,6 +89,7 @@ public class BudgetService {
                         String username,
                         Integer year,
                         Integer month,
+                        Long categoryId,
                         int page,
                         int size) {
 
@@ -94,11 +98,18 @@ public class BudgetService {
 
                 Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-                Page<Budget> budgets = month == null
-                                ? budgetRepository.findByUserIdAndYear(user.getId(), year, pageable)
-                                : budgetRepository.findByUserIdAndYearAndMonth(user.getId(), year, month,
-                                                pageable);
+                Specification<Budget> spec = Specification.where(BudgetSpecification.hasUserEmail(user.getEmail()));
 
+                if (month != null) {
+                        spec = spec.and(BudgetSpecification.hasMonth(month));
+                }
+                if (year != null) {
+                        spec = spec.and(BudgetSpecification.hasYear(year));
+                }
+                if (categoryId != null) {
+                        spec = spec.and(BudgetSpecification.hasCategory(categoryId));
+                }
+                Page<Budget> budgets = budgetRepository.findAll(spec, pageable);
                 List<BudgetResponse> budgetResponses = budgets.stream()
                                 .map(b -> budgetMapper.toDTO(b, getSumExpenseAmount(b)))
                                 .toList();
