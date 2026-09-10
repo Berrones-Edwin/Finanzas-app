@@ -36,7 +36,7 @@ public class BudgetController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<BudgetResponse> getTransactionById(
+    public ResponseEntity<BudgetResponse> getBudgetById(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable("id") Long id) {
 

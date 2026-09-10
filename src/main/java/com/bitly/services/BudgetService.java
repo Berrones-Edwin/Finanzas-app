@@ -2,6 +2,7 @@ package com.bitly.services;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -54,9 +55,12 @@ public class BudgetService {
 
         private BigDecimal getSumExpenseAmount(Budget budget) {
 
-                LocalDate start = budget.getMonth().withDayOfMonth(1);
-                LocalDate end = budget.getMonth().withDayOfMonth(
-                                budget.getMonth().lengthOfMonth());
+                LocalDateTime start = budget.getMonth().withDayOfMonth(1).atStartOfDay();
+                LocalDateTime end = budget.getMonth().withDayOfMonth(
+                                budget.getMonth().lengthOfMonth())
+                                .plusDays(1)
+                                .atStartOfDay()
+                                .minusNanos(1);
 
                 BigDecimal spent = transactionRepository.sumExpenseAmount(
                                 budget.getUser().getId(),
@@ -71,6 +75,7 @@ public class BudgetService {
 
                 Budget budget = budgetRepository.findByIdAndUserEmail(id, username)
                                 .orElseThrow(() -> new EntityNotFoundException("Budget not found with id " + id));
+                System.out.println("User id " + id + "  email " + username);
 
                 return budgetMapper.toDTO(budget, getSumExpenseAmount(budget));
 
