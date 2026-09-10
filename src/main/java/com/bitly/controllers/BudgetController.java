@@ -36,7 +36,7 @@ public class BudgetController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<BudgetResponse> getTransactionById(
+    public ResponseEntity<BudgetResponse> getBudgetById(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable("id") Long id) {
 
@@ -49,11 +49,12 @@ public class BudgetController {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(name = "year", required = false) Integer year,
             @RequestParam(name = "month", required = false) Integer month,
+            @RequestParam(name = "categoryId", required = false) Long categoryId,
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
             @RequestParam(name = "size", defaultValue = "10", required = false) int size) {
 
         return ResponseEntity.ok(
-                budgetService.getAllBudgetsByMonthAndYear(userDetails.getUsername(), year, month, page, size));
+                budgetService.getAllBudgetsByMonthAndYear(userDetails.getUsername(), year, month,categoryId, page, size));
     }
 
     @PostMapping

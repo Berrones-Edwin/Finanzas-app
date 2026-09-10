@@ -2,7 +2,7 @@ package com.bitly.services;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -31,7 +31,7 @@ public class DashboardService {
         this.userRepository = userRepository;
     }
 
-    private void validateRangeDates(LocalDate start, LocalDate end) {
+    private void validateRangeDates(LocalDateTime start, LocalDateTime end) {
 
         if (start == null || end == null) {
             throw new IllegalArgumentException("Start and end are required");
@@ -49,7 +49,7 @@ public class DashboardService {
 
     }
 
-    public DashboardSummaryResponse getDashboardSummary(String username, LocalDate start, LocalDate end) {
+    public DashboardSummaryResponse getDashboardSummary(String username, LocalDateTime start, LocalDateTime end) {
 
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User was not found"));
@@ -79,8 +79,8 @@ public class DashboardService {
 
     public List<DashboardByCategoryResponse> getExpensesByCategory(
             String username,
-            LocalDate start,
-            LocalDate end
+            LocalDateTime start,
+            LocalDateTime end
 
     ) {
 
@@ -95,8 +95,8 @@ public class DashboardService {
 
     public List<DashboardTrendsResponse> getMonthlyTrends(
             String username,
-            LocalDate start,
-            LocalDate end
+            LocalDateTime start,
+            LocalDateTime end
 
     ) {
 
@@ -111,8 +111,8 @@ public class DashboardService {
 
     public List<DashboardByAccountResponse> getBalanceAccount(
             String username,
-            LocalDate start,
-            LocalDate end) {
+            LocalDateTime start,
+            LocalDateTime end) {
 
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User was not found"));

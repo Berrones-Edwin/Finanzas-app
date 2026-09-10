@@ -1,10 +1,11 @@
 
-@TOKEN=eyJhbGciOiJIUzM4NCJ9.eyJmdWxsbmFtZSI6IlVzdWFyaW8gVW5vIHVzdWFyaW8gdW5vIiwic3ViIjoidXNlcjFAdGVzdC5jb20iLCJpYXQiOjE3ODQwNDY5MDEsImV4cCI6MTc4NDEzMzMwMSwiYXV0aG9yaXRpZXMiOlsiUk9MRV9DTElFTlQiXX0.QqNRZXbuq-rJ8FWmvl9tyoyz2o6PegzTK2kort-L8XXk3FpGjdgwqYI9FJOyJIHS
+@TOKEN=eyJhbGciOiJIUzM4NCJ9.eyJmdWxsbmFtZSI6IlVzdWFyaW8gVW5vIHVzdWFyaW8gdW5vIiwic3ViIjoidXNlcjFAdGVzdC5jb20iLCJpYXQiOjE3ODkwNTU0OTUsImV4cCI6MTc4OTE0MTg5NSwidG9rZW5UeXBlIjoiQUNDRVNTIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9DTElFTlQiXX0.rHvN5cYjJTSWV9wXP43d3X7GkB--n1nQwXpcuxAtQ9Nouq8yzBcc2jhXURjaD17W
 @URL=http://localhost:8080/api/v1
 
 ### Save transaction INCOME
 POST {{URL}}/transactions
 Authorization: Bearer {{TOKEN}}
+
 {
     "accountId" :1,
     "categoryId":1,
@@ -31,7 +32,7 @@ GET {{URL}}/transactions?type=EXPENSE&accountId=2
 Authorization: Bearer {{TOKEN}}
 
 ### Ver transacciones en un rango de fechas:
-GET {{URL}}/transactions?categoryId=2
+GET {{URL}}/transactions?categoryId=1
 Authorization: Bearer {{TOKEN}}
 
 # LocalDate month = request.month().withDayOfMonth(1);

@@ -1,6 +1,6 @@
 package com.bitly.controllers;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.cache.annotation.Cacheable;
@@ -38,8 +38,8 @@ public class DashboardController {
     @GetMapping("/summary")
     public ResponseEntity<DashboardSummaryResponse> getSummary(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(name = "start", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-            @RequestParam(name = "end", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end
+            @RequestParam(name = "start", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime start,
+            @RequestParam(name = "end", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime end
 
     ) {
 
@@ -50,8 +50,8 @@ public class DashboardController {
     @GetMapping("/by-category")
     public ResponseEntity<List<DashboardByCategoryResponse>> getExpensesByCategory(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(name = "start", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-            @RequestParam(name = "end", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end
+            @RequestParam(name = "start", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime start,
+            @RequestParam(name = "end", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime end
 
     ) {
         return ResponseEntity.ok(dashboardService.getExpensesByCategory(userDetails.getUsername(), start, end));
@@ -62,8 +62,8 @@ public class DashboardController {
     @GetMapping("/monthly-trends")
     public ResponseEntity<List<DashboardTrendsResponse>> getMonthlyTrends(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(name = "start", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-            @RequestParam(name = "end", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end
+            @RequestParam(name = "start", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime start,
+            @RequestParam(name = "end", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime end
 
     ) {
         return ResponseEntity.ok(dashboardService.getMonthlyTrends(userDetails.getUsername(), start, end));
@@ -73,8 +73,8 @@ public class DashboardController {
     @GetMapping("/by-account")
     public ResponseEntity<List<DashboardByAccountResponse>> getBalanceByAccount(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(name = "start", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-            @RequestParam(name = "end", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+            @RequestParam(name = "start", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime start,
+            @RequestParam(name = "end", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime end) {
 
         return ResponseEntity.ok(dashboardService.getBalanceAccount(userDetails.getUsername(), start, end));
 

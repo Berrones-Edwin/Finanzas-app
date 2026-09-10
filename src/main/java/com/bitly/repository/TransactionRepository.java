@@ -1,7 +1,7 @@
 package com.bitly.repository;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,8 +25,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
         BigDecimal sumExpenseAmount(
                         @Param("userId") Long userId,
                         @Param("categoryId") Long categoryId,
-                        @Param("start") LocalDate start,
-                        @Param("end") LocalDate end);
+                        @Param("start") LocalDateTime start,
+                        @Param("end") LocalDateTime end);
 
         @Query("""
                         SELECT COALESCE(SUM(t.amount),0)
@@ -37,8 +37,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
                                 """)
         BigDecimal sumIncome(
                         @Param("userId") Long userId,
-                        @Param("start") LocalDate start,
-                        @Param("end") LocalDate end);
+                        @Param("start") LocalDateTime start,
+                        @Param("end") LocalDateTime end);
 
         @Query("""
                         SELECT COALESCE(SUM(t.amount),0)
@@ -49,8 +49,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
                                 """)
         BigDecimal sumExpense(
                         @Param("userId") Long userId,
-                        @Param("start") LocalDate start,
-                        @Param("end") LocalDate end);
+                        @Param("start") LocalDateTime start,
+                        @Param("end") LocalDateTime end);
 
         @Query("""
                         SELECT
@@ -67,8 +67,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
                                 """)
         List<DashboardByCategoryResponse> getExpensesByCategory(
                         @Param("userId") Long userId,
-                        @Param("start") LocalDate start,
-                        @Param("end") LocalDate end);
+                        @Param("start") LocalDateTime start,
+                        @Param("end") LocalDateTime end);
 
         @Query("""
                         SELECT
@@ -90,8 +90,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
                                 """)
         List<DashboardByAccountResponse> getBalanceByAccount(
                         @Param("userId") Long userId,
-                        @Param("start") LocalDate start,
-                        @Param("end") LocalDate end);
+                        @Param("start") LocalDateTime start,
+                        @Param("end") LocalDateTime end);
 
         @Query("""
                         SELECT
@@ -120,7 +120,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
                         """)
         List<DashboardTrendsResponse> findMonthlyTrends(
                         @Param("userId") Long userId,
-                        @Param("start") LocalDate start,
-                        @Param("end") LocalDate end);
+                        @Param("start") LocalDateTime start,
+                        @Param("end") LocalDateTime end);
 
 }
