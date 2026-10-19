@@ -33,3 +33,21 @@ build/
 .vscode/
 
 /logs/**
+
+### Environment & local config ###
+.env
+.env.*
+application-local.properties
+application-local.yml
+*.pem
+*.key
+
+### Logs & temporary files ###
+*.log
+.tmp/
+
+### AI agent state ###
+.opencode/*
+!.opencode/skills/
+!.opencode/skills/**
+session-*.md
