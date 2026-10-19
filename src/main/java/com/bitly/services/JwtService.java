@@ -108,7 +108,7 @@ public class JwtService {
         return jwtRefreshExpiration;
     }
 
-    public long getJwtExpiration(){
+    public long getJwtExpiration() {
         return jwtExpiration;
     }
 
@@ -119,6 +119,10 @@ public class JwtService {
     private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public boolean isAccessToken(String token) {
+        return TokenType.ACCESS.name().equals(extractTokenType(token));
     }
 
 }

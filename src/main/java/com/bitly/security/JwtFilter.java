@@ -7,8 +7,11 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.bitly.enums.TokenType;
 import com.bitly.repository.TokenRepository;
 import com.bitly.services.JwtService;
+
+import io.jsonwebtoken.JwtException;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,9 +25,10 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
-
+@Slf4j
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -74,16 +78,24 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         jwt = authHeader.substring(7);
-        userEmail = jwtService.extractUsername(jwt);
+        try {
+            userEmail = jwtService.extractUsername(jwt);
+        } catch (JwtException | IllegalArgumentException ex) {
+            log.debug("Jwt is invalid in Authorization header: {}", ex.getMessage());
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
-            boolean isTokenValidInDB = tokenRepository.findByToken(jwt)
+            boolean isTokenValidInDB = tokenRepository.findByTokenAndTokenType(jwt, TokenType.ACCESS)
                     .map(t -> !t.isRevoked() && t.getExpiresAt().isAfter(LocalDateTime.now()))
                     .orElse(false);
 
-            if (jwtService.isTokenValid(jwt, userDetails) && isTokenValidInDB) {
+            if (jwtService.isTokenValid(jwt, userDetails)
+                    && isTokenValidInDB
+                    && jwtService.isAccessToken(jwt)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
