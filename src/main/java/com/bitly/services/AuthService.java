@@ -3,6 +3,8 @@ package com.bitly.services;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Objects;
+import java.util.UUID;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -81,7 +83,7 @@ public class AuthService {
                 var user = (User) auth.getPrincipal();
                 claims.put("fullname", user.getFullName());
 
-                return issueTokenPair(user);
+                return issueTokenPair(user, UUID.randomUUID().toString());
         }
 
         @Transactional
@@ -92,17 +94,28 @@ public class AuthService {
                 Token stored = tokenRepository.findByTokenAndTokenType(providedRefresh, TokenType.REFRESH)
                                 .orElseThrow(() -> new RefreshTokenException("Invalid refresh token"));
 
-                if (stored.isRevoked() || stored.getExpiresAt().isBefore(LocalDateTime.now())) {
-                        log.warn("Refresh token rejected. tokenId={}, revoked={}, expired={}",
-                                        stored.getId(),
-                                        stored.isRevoked(),
-                                        stored.getExpiresAt().isBefore(LocalDateTime.now()));
-                        throw new RefreshTokenException("Refresh token has been revoked or expired");
+                if (stored.isRevoked()) {
+                        log.warn("Refresh token reuse detected, revoking session. tokenId={}, sessionId={}",
+                                        stored.getId(), stored.getSessionId());
+                        tokenRepository.revokeAllBySessionId(stored.getSessionId(), LocalDateTime.now());
+                        throw new RefreshTokenException("Refresh token has already been used");
+                }
+
+                if (stored.getExpiresAt().isBefore(LocalDateTime.now())) {
+
+                        throw new RefreshTokenException("Refresh token has expired");
+
+                }
+
+                if (!Objects.equals(jwtService.extractSessionId(providedRefresh), stored.getSessionId())) {
+                        throw new RefreshTokenException("Invalid refresh token");
+
                 }
 
                 User user = stored.getUser();
 
-                if (!jwtService.isRefreshToken(providedRefresh) || !user.getEmail().equals(jwtService.extractUsername(providedRefresh))) {
+                if (!jwtService.isRefreshToken(providedRefresh)
+                                || !user.getEmail().equals(jwtService.extractUsername(providedRefresh))) {
                         throw new RefreshTokenException("Invalid refresh token");
                 }
 
@@ -114,26 +127,27 @@ public class AuthService {
                 stored.setValidatedAt(LocalDateTime.now());
                 tokenRepository.save(stored);
 
-                AuthenticationResponse response = issueTokenPair(user);
+                AuthenticationResponse response = issueTokenPair(user, stored.getSessionId());
 
                 log.info("Tokens refreshed. userId={}", user.getId());
 
                 return response;
         }
 
-        private AuthenticationResponse issueTokenPair(User user) {
+        private AuthenticationResponse issueTokenPair(User user, String sessionId) {
 
                 var claims = new HashMap<String, Object>();
                 claims.put("fullname", user.getFullName());
 
-                String jwtToken = jwtService.generateToken(claims, user);
-                String refreshToken = jwtService.generateRefreshToken(claims, user);
+                String jwtToken = jwtService.generateToken(claims, user, sessionId);
+                String refreshToken = jwtService.generateRefreshToken(claims, user, sessionId);
                 LocalDateTime now = LocalDateTime.now();
 
                 Token tokenEntity = Token.builder()
                                 .token(jwtToken)
                                 .tokenType(TokenType.ACCESS)
                                 .user(user)
+                                .sessionId(sessionId)
                                 .createdAt(now)
                                 .expiresAt(now.plus(Duration.ofMillis(jwtService.getJwtExpiration())))
                                 .revoked(false)
@@ -145,6 +159,7 @@ public class AuthService {
                                 .token(refreshToken)
                                 .tokenType(TokenType.REFRESH)
                                 .user(user)
+                                .sessionId(sessionId)
                                 .createdAt(now)
                                 .expiresAt(now.plus(java.time.Duration.ofMillis(jwtService.getRefreshExpiration())))
                                 .revoked(false)
@@ -166,19 +181,17 @@ public class AuthService {
 
                 String authHeader = logoutRequest.getHeader(HttpHeaders.AUTHORIZATION);
 
-                if (authHeader != null && authHeader.startsWith("Bearer ")) {
-
-                        String jwt = authHeader.substring(7);
-
-                        Token token = tokenRepository.findByToken(jwt)
-                                        .orElseThrow(() -> new IllegalArgumentException("Token was not found"));
-
-                        token.setRevoked(true);
-                        token.setValidatedAt(LocalDateTime.now());
-
-                        log.info("User logged out. userId={}, tokenId={}",
-                                        token.getUser().getId(),
-                                        token.getId());
+                if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                        return;
                 }
+                String sessionId = jwtService.extractSessionId(authHeader.substring(7));
+
+                if (sessionId == null) {
+                        log.warn("Legacy token without session id, nothing to revoke");
+                        return;
+                }
+
+                int revoked = tokenRepository.revokeAllBySessionId(sessionId, LocalDateTime.now());
+                log.info("Session closed. sessionID={}, revokedTokens={}", sessionId, revoked);
         }
 }

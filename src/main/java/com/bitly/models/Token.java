@@ -47,6 +47,9 @@ public class Token {
     @Column(name = "token_type", nullable = false)
     private TokenType tokenType;
 
+    @Column(name = "session_id", nullable = false, length = 36)
+    private String sessionId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId", nullable = false)
     private User user;
