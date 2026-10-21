@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +50,7 @@ public class DashboardService {
 
     }
 
+    @Cacheable(cacheNames = "dashboard-summary", keyGenerator = "dashboardKeyGenerator")
     public DashboardSummaryResponse getDashboardSummary(String username, LocalDateTime start, LocalDateTime end) {
 
         User user = userRepository.findByEmail(username)
@@ -77,6 +79,7 @@ public class DashboardService {
 
     }
 
+    @Cacheable(cacheNames = "dashboard-by-category", keyGenerator = "dashboardKeyGenerator")
     public List<DashboardByCategoryResponse> getExpensesByCategory(
             String username,
             LocalDateTime start,
@@ -93,6 +96,7 @@ public class DashboardService {
         return transactionRepository.getExpensesByCategory(userId, start, end);
     }
 
+    @Cacheable(cacheNames = "dashboard-monthly-trends", keyGenerator = "dashboardKeyGenerator")
     public List<DashboardTrendsResponse> getMonthlyTrends(
             String username,
             LocalDateTime start,
@@ -109,10 +113,13 @@ public class DashboardService {
         return transactionRepository.findMonthlyTrends(userId, start, end);
     }
 
+    @Cacheable(cacheNames = "dashboard-by-account", keyGenerator = "dashboardKeyGenerator")
     public List<DashboardByAccountResponse> getBalanceAccount(
             String username,
             LocalDateTime start,
             LocalDateTime end) {
+
+        validateRangeDates(start, end);
 
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User was not found"));
