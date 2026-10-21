@@ -29,9 +29,8 @@ public class JwtService {
     @Value("${refresh.expiration}")
     private long jwtRefreshExpiration;
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
-    }
+    private static final String SESSION_ID_CLAIM = "sid";
+    private static final String TOKEN_TYPE_CLAIM = "tokenType";
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -59,19 +58,20 @@ public class JwtService {
                 .getPayload();
     }
 
-    public String generateToken(Map<String, Object> claims, UserDetails userDetails) {
-        return buildToken(claims, userDetails, jwtExpiration, TokenType.ACCESS);
+    public String generateToken(Map<String, Object> claims, UserDetails userDetails, String sessionId) {
+        return buildToken(claims, userDetails, jwtExpiration, TokenType.ACCESS, sessionId);
     }
 
-    public String generateRefreshToken(Map<String, Object> claims, UserDetails userDetails) {
-        return buildToken(claims, userDetails, jwtRefreshExpiration, TokenType.REFRESH);
+    public String generateRefreshToken(Map<String, Object> claims, UserDetails userDetails, String sessionId) {
+        return buildToken(claims, userDetails, jwtRefreshExpiration, TokenType.REFRESH, sessionId);
     }
 
     public String buildToken(
             Map<String, Object> claims,
             UserDetails userDetails,
             long jwtExpiration,
-            TokenType tokenType
+            TokenType tokenType,
+            String sessionId
 
     ) {
 
@@ -85,8 +85,9 @@ public class JwtService {
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .claim("tokenType", tokenType.name())
                 .claim("authorities", authorities)
+                .claim(TOKEN_TYPE_CLAIM, tokenType.name())
+                .claim(SESSION_ID_CLAIM, sessionId)
                 .signWith(getSignInKey())
                 .compact();
     }
@@ -123,6 +124,10 @@ public class JwtService {
 
     public boolean isAccessToken(String token) {
         return TokenType.ACCESS.name().equals(extractTokenType(token));
+    }
+
+    public String extractSessionId(String token) {
+        return extractClaim(token, claims -> claims.get(SESSION_ID_CLAIM, String.class));
     }
 
 }
