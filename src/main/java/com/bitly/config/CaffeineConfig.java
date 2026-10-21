@@ -15,28 +15,20 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 @Configuration
 public class CaffeineConfig implements CachingConfigurer {
 
+    private Caffeine<Object, Object> dashboardCacheSpec() {
+        return Caffeine.newBuilder()
+                .maximumSize(1_000)
+                .expireAfterWrite(2, TimeUnit.MINUTES);
+    }
+
     @Bean
     public CacheManager cacheManager() {
 
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager();
-
-        cacheManager.registerCustomCache("dashboard-by-account", Caffeine.newBuilder()
-                .maximumSize(1)
-                .expireAfterWrite(2, TimeUnit.MINUTES)
-                .build());
-
-        cacheManager.registerCustomCache("dashboard-by-category", Caffeine.newBuilder()
-                .maximumSize(1)
-                .expireAfterWrite(2, TimeUnit.MINUTES)
-                .build());
-        cacheManager.registerCustomCache("dashboard-montly-trends", Caffeine.newBuilder()
-                .maximumSize(1)
-                .expireAfterWrite(2, TimeUnit.MINUTES)
-                .build());
-        cacheManager.registerCustomCache("dashboard-summary", Caffeine.newBuilder()
-                .maximumSize(1)
-                .expireAfterWrite(2, TimeUnit.MINUTES)
-                .build());
+        var cacheManager = new CaffeineCacheManager();
+        cacheManager.registerCustomCache("dashboard-summary", dashboardCacheSpec().build());
+        cacheManager.registerCustomCache("dashboard-by-account", dashboardCacheSpec().build());
+        cacheManager.registerCustomCache("dashboard-by-category", dashboardCacheSpec().build());
+        cacheManager.registerCustomCache("dashboard-monthly-trends", dashboardCacheSpec().build());
 
         return cacheManager;
     }
