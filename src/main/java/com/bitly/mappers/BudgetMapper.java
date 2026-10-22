@@ -37,6 +37,7 @@ public class BudgetMapper {
                 .remainingAmount(remaining)
                 .percentageUsed(percentageUsed)
                 .isAlertSent(b.getIsAlertSent())
+                .alertThreshold(b.getAlertThreshold())
                 .build();
     }
 }

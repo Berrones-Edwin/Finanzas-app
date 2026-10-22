@@ -3,7 +3,6 @@ package com.bitly.services;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Year;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -42,28 +41,30 @@ public class BudgetService {
         private final UserRepository userRepository;
         private final CategoryRepository categoryRepository;
         private final BudgetMapper budgetMapper;
+        private final HelperService helperService;
+        private final BudgetAlertService budgetAlertService;
 
         public BudgetService(
                         BudgetRepository budgetRepository,
                         TransactionRepository transactionRepository,
                         UserRepository userRepository,
                         CategoryRepository categoryRepository,
-                        BudgetMapper budgetMapper) {
+                        BudgetMapper budgetMapper,
+                        HelperService helperService,
+                        BudgetAlertService budgetAlertService) {
                 this.budgetRepository = budgetRepository;
                 this.transactionRepository = transactionRepository;
                 this.userRepository = userRepository;
                 this.categoryRepository = categoryRepository;
                 this.budgetMapper = budgetMapper;
+                this.helperService = helperService;
+                this.budgetAlertService = budgetAlertService;
         }
 
         private BigDecimal getSumExpenseAmount(Budget budget) {
 
-                LocalDateTime start = budget.getMonth().withDayOfMonth(1).atStartOfDay();
-                LocalDateTime end = budget.getMonth().withDayOfMonth(
-                                budget.getMonth().lengthOfMonth())
-                                .plusDays(1)
-                                .atStartOfDay()
-                                .minusNanos(1);
+                LocalDateTime start = helperService.startOfMonth(budget.getMonth());
+                LocalDateTime end = helperService.endOfMonth(budget.getMonth());
 
                 BigDecimal spent = transactionRepository.sumExpenseAmount(
                                 budget.getUser().getId(),
@@ -165,7 +166,14 @@ public class BudgetService {
                                 saved.getId(),
                                 saved.getAmount(),
                                 category.getId());
-                return budgetMapper.toDTO(saved, BigDecimal.ZERO);
+
+                boolean alerted = budgetAlertService.evaluate(saved);
+
+                BudgetResponse response = budgetMapper.toDTO(saved, getSumExpenseAmount(saved));
+                if (alerted) {
+                        response.setIsAlertSent(true);
+                }
+                return response;
         }
 
         @Transactional
@@ -174,13 +182,21 @@ public class BudgetService {
                 Budget budget = budgetRepository.findByIdAndUserEmail(id, username)
                                 .orElseThrow(() -> new EntityNotFoundException("Budget not found with id " + id));
 
-                budget.setAmount(request.amount());
+                boolean amountChanged = budget.getAmount().compareTo(request.amount()) != 0;
+                boolean thresholdChanged = request.alertThreshold() != null
+                                && !request.alertThreshold().equals(budget.getAlertThreshold());
+                boolean shouldReevaluate = amountChanged || thresholdChanged;
 
+                budget.setAmount(request.amount());
                 if (request.alertThreshold() != null) {
                         budget.setAlertThreshold(request.alertThreshold());
                 }
 
                 budget.setNotes(request.notes());
+
+                if (shouldReevaluate) {
+                        budget.setIsAlertSent(false);
+                }
 
                 Budget updated = budgetRepository.save(budget);
 
@@ -190,7 +206,16 @@ public class BudgetService {
                                 updated.getAmount(),
                                 updated.getCategory().getId());
 
-                return budgetMapper.toDTO(updated, getSumExpenseAmount(budget));
+                boolean alerted = false;
+                if (shouldReevaluate) {
+                        alerted = budgetAlertService.evaluate(updated);
+                }
+
+                BudgetResponse response = budgetMapper.toDTO(updated, getSumExpenseAmount(budget));
+                if (alerted) {
+                        response.setIsAlertSent(true);
+                }
+                return response;
         }
 
         @Transactional
