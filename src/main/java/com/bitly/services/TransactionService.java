@@ -20,6 +20,7 @@ import com.bitly.dtos.transactions.TransactionResponse;
 import com.bitly.enums.TransactionType;
 import com.bitly.exceptions.AccountConflictException;
 import com.bitly.exceptions.InsufficientFundsException;
+import com.bitly.exceptions.TransactionTypeMismatchException;
 import com.bitly.mappers.TransactionMapper;
 import com.bitly.models.Category;
 import com.bitly.models.Transaction;
@@ -43,18 +44,21 @@ public class TransactionService {
     private final CategoryRepository categoryRepository;
     private final TransactionRepository transactionRepository;
     private final TransactionMapper transactionMapper;
+    private final BudgetAlertService budgetAlertService;
 
     public TransactionService(
             UserRepository userRepository,
             AccountRepository accountRepository,
             CategoryRepository categoryRepository,
             TransactionRepository transactionRepository,
-            TransactionMapper transactionMapper) {
+            TransactionMapper transactionMapper,
+            BudgetAlertService budgetAlertService, BudgetService budgetService) {
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;
         this.categoryRepository = categoryRepository;
         this.transactionRepository = transactionRepository;
         this.transactionMapper = transactionMapper;
+        this.budgetAlertService = budgetAlertService;
     }
 
     @Transactional
@@ -65,6 +69,12 @@ public class TransactionService {
 
         Category category = categoryRepository.findByIdAndUserEmail(request.categoryId(), username).orElseThrow(
                 () -> new EntityNotFoundException("No category found with the id " + request.categoryId()));
+
+        if (!category.getCategoryType().name().equals(request.transactionType().name())) {
+            throw new TransactionTypeMismatchException(
+                    "Transaction type " + request.transactionType()
+                            + " does not match category type " + category.getCategoryType());
+        }
 
         Account account = accountRepository.findByIdAndUserEmail(request.accountId(), username).orElseThrow(
                 () -> new EntityNotFoundException("No Account found with the id " + request.categoryId()));
@@ -86,9 +96,8 @@ public class TransactionService {
         try {
             accountRepository.saveAndFlush(account);
             log.info(
-                    "Transaction created. userId={}, transactionId={}, type={}, amount={}, accountId={}, categoryId={}",
+                    "Account modified. userId={},  type={}, amount={}, accountId={}, categoryId={}",
                     user.getId(),
-                    request.accountId(),
                     request.transactionType(),
                     request.amount(),
                     account.getId(),
@@ -96,9 +105,8 @@ public class TransactionService {
         } catch (ObjectOptimisticLockingFailureException ex) {
 
             log.warn(
-                    "Optimistic locking conflict. userId={}, transactionId={}, type={}, amount={}, accountId={}, categoryId={}",
+                    "Optimistic locking conflict. userId={},  type={}, amount={}, accountId={}, categoryId={}",
                     user.getId(),
-                    request.accountId(),
                     request.transactionType(),
                     request.amount(),
                     account.getId(),
@@ -107,6 +115,10 @@ public class TransactionService {
             throw new AccountConflictException("The account was modified concurrently, please retry");
         }
 
+        LocalDateTime ocurredAt = request.date() != null
+                ? request.date()
+                : LocalDateTime.now();
+
         Transaction transaction = Transaction.builder()
                 .user(user)
                 .category(category)
@@ -114,10 +126,11 @@ public class TransactionService {
                 .transactionType(request.transactionType())
                 .amount(request.amount())
                 .description(request.description())
-                .date(LocalDateTime.now())
+                .date(ocurredAt)
                 .build();
 
-        Transaction transactionSaved = transactionRepository.save(transaction);
+        Transaction transactionSaved = transactionRepository.saveAndFlush(transaction);
+        budgetAlertService.evaluate(transactionSaved);
 
         return transactionMapper.toDTO(transactionSaved);
 
@@ -134,7 +147,7 @@ public class TransactionService {
             LocalDate start,
             LocalDate end) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
 
         Specification<Transaction> spec = Specification.where(TransactionSpecification.hasUserEmail(username));
 

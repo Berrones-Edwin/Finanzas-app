@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,6 +49,15 @@ public class GlobalExceptionHandler {
                                 createProblem(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage(), request, null));
         }
 
+        @ExceptionHandler(TransactionTypeMismatchException.class)
+        public ResponseEntity<ProblemDetail> handleTransactionTypeMismatch(
+                        TransactionTypeMismatchException ex,
+                        HttpServletRequest request) {
+
+                return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(
+                                createProblem(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage(), request, null));
+        }
+
         @ExceptionHandler({
 
                         CategoryAlreadyExistsException.class,
@@ -74,7 +84,8 @@ public class GlobalExceptionHandler {
                                 .body(createProblem(HttpStatus.UNAUTHORIZED, ex.getMessage(), request, null));
         }
 
-        @ExceptionHandler(MethodArgumentNotValidException.class)        public ResponseEntity<ProblemDetail> handleValidation(
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<ProblemDetail> handleValidation(
                         MethodArgumentNotValidException ex,
                         HttpServletRequest request) {
 
@@ -85,6 +96,20 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity.badRequest().body(
                                 createProblem(HttpStatus.BAD_REQUEST, "Validation failed", request, errors));
+        }
+
+        @ExceptionHandler(EntityNotFoundException.class)
+        public ResponseEntity<ProblemDetail> handleNotFound(
+                        EntityNotFoundException ex, HttpServletRequest request) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body(createProblem(HttpStatus.NOT_FOUND, ex.getMessage(), request, null));
+        }
+
+        @ExceptionHandler(IllegalArgumentException.class)
+        public ResponseEntity<ProblemDetail> handleBadRequest(
+                        IllegalArgumentException ex, HttpServletRequest request) {
+                return ResponseEntity.badRequest()
+                                .body(createProblem(HttpStatus.BAD_REQUEST, ex.getMessage(), request, null));
         }
 
         @ExceptionHandler(Exception.class)

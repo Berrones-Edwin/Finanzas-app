@@ -38,10 +38,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "users",uniqueConstraints = {
-    @UniqueConstraint(name="uq_user_email_delete_at",columnNames = {
-        "email","deleted_at"
-    })
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(name = "uq_user_email_delete_at", columnNames = {
+                "email", "deleted_at"
+        })
 })
 
 @SQLDelete(sql = "UPDATE users SET deleted_at = NOW() WHERE id = ?")
@@ -61,7 +61,7 @@ public class User extends BaseEntity implements UserDetails, Principal {
     private String lastName;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "preferred_currency",length = 3)
+    @Column(name = "preferred_currency", length = 3)
     private CurrencyEnum preferredCurrency;
 
     @Enumerated(EnumType.STRING)
@@ -84,11 +84,14 @@ public class User extends BaseEntity implements UserDetails, Principal {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Budget> budgets = new ArrayList<>();
-    
+
     @OneToMany(mappedBy = "user")
     @Builder.Default
     private List<Transfer> transfers = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user")
+    @Builder.Default
+    private List<Notification> notifications = new ArrayList<>();
 
     @Override
     public String getPassword() {

@@ -24,5 +24,6 @@ public class BudgetResponse {
     private BigDecimal remainingAmount;
     private BigDecimal percentageUsed;
     private Boolean isAlertSent;
+    private Integer alertThreshold;
 
 }
