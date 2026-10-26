@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public record DashboardSummaryResponse(
     BigDecimal income,
-    BigDecimal expensess,
+    BigDecimal expenses,
     BigDecimal balance,
     BigDecimal savingsRate
 ) {
