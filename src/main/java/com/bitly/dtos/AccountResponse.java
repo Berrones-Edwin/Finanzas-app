@@ -24,6 +24,7 @@ public class AccountResponse {
     private String currency;
     private String color;
     private BigDecimal balance;
+    private boolean isActive;
     private LocalDateTime createdAt;
 
 }
