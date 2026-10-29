@@ -7,13 +7,15 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.bitly.enums.NotificationStatus;
 import com.bitly.models.Notification;
 
-public interface NotificationRepository extends JpaRepository<Notification, Long> {
+public interface NotificationRepository
+    extends JpaRepository<Notification, Long>, JpaSpecificationExecutor<Notification> {
 
   @Query("""
           SELECT n FROM Notification n
@@ -29,5 +31,18 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
   Page<Notification> findByUserEmail(String email, Pageable pageable);
 
   Optional<Notification> findByIdAndUserEmail(Long id, String email);
+
+  Long countByUserEmailAndReadAtIsNull(String email);
+
+  @Query("""
+      UPDATE Notification n
+      SET n.readAt = :now
+      WHERE n.user.email = :email
+      AND n.readAt IS NULL
+      AND n.deletedAt IS NULL
+  """)
+  int markAllAsRead(
+      @Param("email") String email,
+      @Param("now") LocalDateTime now);
 
 }
