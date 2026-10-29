@@ -20,6 +20,7 @@ public class AccountMapper {
         .currency(a.getCurrency().getCurrencyCode())
         .color(a.getColor())
         .balance(a.getBalance())
+        .isActive(a.isActive())
         .createdAt(a.getCreatedAt())
         .build();
     }
