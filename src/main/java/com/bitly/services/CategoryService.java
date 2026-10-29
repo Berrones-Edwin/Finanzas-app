@@ -152,7 +152,7 @@ public class CategoryService {
                 categoryRepository.delete(category);
 
                 
-                 log.info("Category updated. userId={}, categoryId={}, name={}, type={}",
+                 log.info("Category deleted. userId={}, categoryId={}, name={}, type={}",
                         category.getUser().getId(),
                         category.getId(),
                         category.getName(),
